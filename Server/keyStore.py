@@ -16,6 +16,15 @@ DB_USER = 'flask-server'
 DB_PASSWORD = 'test123'
 DB_HOST = 'localhost'
 TABLES = {}
+issuer = x509.Name([
+    x509.NameAttribute(NameOID.COUNTRY_NAME, u"DE"),
+    x509.NameAttribute(NameOID.STATE_OR_PROVINCE_NAME, u"Berlin"),
+    x509.NameAttribute(NameOID.LOCALITY_NAME, u"Berlin"),
+    x509.NameAttribute(NameOID.ORGANIZATION_NAME, u"crypt-cloud"),
+    x509.NameAttribute(NameOID.COMMON_NAME, u"crypt-cloud"),
+    ])
+CRL_UPDATE = datetime.datetime.utcnow().date()
+REVOCATION_LIST = None
 
 def loadPrivateKey():
     #only create private key if not stored in file on disk!
@@ -55,6 +64,8 @@ TABLES['certificates'] = (
     "  `cert_id` varchar(64) NOT NULL,"
     "  `username` varchar(20) NOT NULL,"
     "  `cert_data` blob NOT NULL,"
+    "  `revoked` bool NOT NULL,"
+    "  `expiry` date NOT NULL,"
     "  PRIMARY KEY (`cert_id`),"
     "  CONSTRAINT `cert_uname` FOREIGN KEY (`username`) "
     "     REFERENCES `user` (`username`) ON DELETE CASCADE"
@@ -63,7 +74,8 @@ TABLES['certificates'] = (
 TABLES['revocations'] = (
     "CREATE TABLE IF NOT EXISTS `revocations` ("
     "  `username` varchar(20) NOT NULL,"
-    "  `cert_id` varchar(30) NOT NULL,"
+    "  `cert_id` varchar(64) NOT NULL,"
+    "  `revocation_date` date NOT NULL,"
     "  PRIMARY KEY (`username`, `cert_id`),"
     "  CONSTRAINT `rev_uname` FOREIGN KEY (`username`) "
     "     REFERENCES `user` (`username`) ON DELETE CASCADE,"
@@ -95,21 +107,76 @@ def createUser(username, email, password):
     cnx.close()
     return "Success"
 
-def retrieveCert():
-    return ""
+def userExists(username):
+    result = False
+    stmt = ("SELECT COUNT(*) FROM user WHERE username=%s")
+    cnx = mysql.connector.connect(user=DB_USER, password=DB_PASSWORD, host=DB_HOST, database=DB_NAME)
+    cur = cnx.cursor()
+    cur.execute(stmt, [username])
+    if cur.fetchone()[0] == 1:
+        result = True
+    cnx.close()
+    return result
 
-def revokeCert(u_id, cert_serial):
-    return False
+# returns the users longest valid certificate
+# or None if it does not exist or the user does not exist
+def retrieveCert(username):
+    cert = None
+    if not userExists(username):
+        return cert
 
-#create cert from csr and return it in pem-encoding and return its serial number
+    stmt = ("SELECT cert_data, expiry FROM certificates WHERE username=%s AND revoked=0 AND expiry>=%s ORDER BY expiry DESC")
+    cnx = mysql.connector.connect(user=DB_USER, password=DB_PASSWORD, host=DB_HOST, database=DB_NAME)
+    cur = cnx.cursor()
+    cur.execute(stmt, [username, str(datetime.datetime.utcnow().date())])
+    try:
+        cert = cur.fetchone()[0]
+    except TypeError:
+        cnx.close()
+        return cert
+    cnx.close()
+    return cert
+
+# returns true if certificate is valid
+def isValid(username, cert_id):
+    result = False
+    stmt = ("SELECT COUNT(*) FROM revocations WHERE username=%s AND cert_id=%s")
+    cnx = mysql.connector.connect(user=DB_USER, password=DB_PASSWORD, host=DB_HOST, database=DB_NAME)
+    cur = cnx.cursor()
+    cur.execute(stmt, [username, cert_id])
+    if cur.fetchone()[0] == 0:
+        result = True
+    cnx.close()
+    return result
+
+def revokeCert(username, cert_id=None):
+    if cert_id and not isValid(username, cert_id):
+        return False
+    cnx = mysql.connector.connect(user=DB_USER, password=DB_PASSWORD, host=DB_HOST, database=DB_NAME)
+    cur = cnx.cursor()
+    if cert_id:
+        # just revoke this specified certificate
+        stmt = ("UPDATE certificates SET revoked=true WHERE username=%s AND cert_id=%s")
+        cur.execute(stmt, [username, cert_id])
+        stmt = ("INSERT INTO revocations (username, cert_id, revocation_date) VALUES (%s, %s, %s)")
+        cur.execute(stmt, [username, cert_id, str(datetime.datetime.utcnow().date())])
+    else:
+        # revoke all of the users certificates if none particular specified!
+        stmt = ("SELECT cert_id FROM certificates WHERE username=%s AND revoked=false")
+
+        cur.execute(stmt, [username])
+        cert_ids = cur.fetchall()
+        stmt = ("UPDATE certificates SET revoked=true WHERE username=%s")
+        cur.execute(stmt, [username])
+        for row in cert_ids:
+            stmt = ("INSERT INTO revocations (username, cert_id, revocation_date) VALUES (%s, %s, %s)")
+            cur.execute(stmt, [username, row[0], str(datetime.datetime.utcnow().date())])
+    cnx.commit()
+    cnx.close()
+    return True
+
+#create cert from csr and return it in pem-encoding and return its serial number and validity date
 def createCert(csr):
-    issuer = x509.Name([
-        x509.NameAttribute(NameOID.COUNTRY_NAME, u"DE"),
-        x509.NameAttribute(NameOID.STATE_OR_PROVINCE_NAME, u"Berlin"),
-        x509.NameAttribute(NameOID.LOCALITY_NAME, u"Berlin"),
-        x509.NameAttribute(NameOID.ORGANIZATION_NAME, u"crypt-cloud"),
-        x509.NameAttribute(NameOID.COMMON_NAME, u"crypt-cloud"),
-        ])
     cert = x509.CertificateBuilder().subject_name(
         csr.subject
     ).issuer_name(
@@ -125,28 +192,65 @@ def createCert(csr):
         datetime.datetime.utcnow() + datetime.timedelta(days=(2*365))
     ).sign(privateKey, hashes.SHA512(), default_backend())
 
-    return cert.public_bytes(serialization.Encoding.PEM), cert.serial_number
+    return cert.public_bytes(serialization.Encoding.PEM), cert.serial_number, str(cert.not_valid_after)
 
 # store signed cert in DB and return it in pem-encoding,
 # return None if invalid csr (i.e. hash or username does not match)
 # input is required to be a username-string and csr in pem-encoding
+# users can update certs even though, they still have valid certs.
 def updateCert(username, csr):
     csr = x509.load_pem_x509_csr(csr, default_backend())
     if not csr.is_signature_valid or not username == csr.subject.get_attributes_for_oid(NameOID.USER_ID)[0].value:
         return None
-    cert, cert_id = createCert(csr)
+    cert, cert_id, expiry = createCert(csr)
 
-    stmt = ("INSERT INTO certificates (cert_id, username, cert_data) VALUES (%s, %s, %s)")
+    stmt = ("INSERT INTO certificates (cert_id, username, cert_data, revoked, expiry) VALUES (%s, %s, %s, false, %s)")
     cnx = mysql.connector.connect(user=DB_USER, password=DB_PASSWORD, host=DB_HOST, database=DB_NAME)
     cur = cnx.cursor()
     try:
-        cur.execute(stmt, (cert_id, username, cert))
+        cur.execute(stmt, (cert_id, username, cert, expiry))
     except mysql.connector.errors.IntegrityError as e:
         print(e)
         return None
     cnx.commit()
     cnx.close()
     return cert
+
+# returns the list of revoked certificates or None if no revcations so far
+def getRevocationList():
+    # no new update needed for now
+    global CRL_UPDATE
+    global REVOCATION_LIST
+    if CRL_UPDATE > datetime.datetime.utcnow().date():
+        return REVOCATION_LIST
+
+    cnx = mysql.connector.connect(user=DB_USER, password=DB_PASSWORD, host=DB_HOST, database=DB_NAME)
+    cur = cnx.cursor()
+    cur.execute("SELECT * FROM revocations")
+    revoked = cur.fetchall()
+    cnx.close()
+    if len(revoked) == 0:
+        # no revoked certificates
+        print("here")
+        return None
+
+    builder = x509.CertificateRevocationListBuilder()
+    builder = builder.issuer_name(issuer)
+    builder = builder.last_update(datetime.datetime.today())
+    builder = builder.next_update(datetime.datetime.today() + datetime.timedelta(1, 0, 0))
+    for cert in revoked:
+        revoked_cert = x509.RevokedCertificateBuilder().serial_number(
+            int(cert[1])
+        ).revocation_date(
+            datetime.datetime.strptime(str(cert[2]), '%Y-%m-%d')
+        ).build(default_backend())
+        builder = builder.add_revoked_certificate(revoked_cert)
+    REVOCATION_LIST = builder.sign(
+        private_key=privateKey, algorithm=hashes.SHA512(),
+        backend=default_backend()
+    ).public_bytes(serialization.Encoding.PEM)
+    CRL_UPDATE = datetime.datetime.utcnow().date() + datetime.timedelta(1)
+    return REVOCATION_LIST
 
 if __name__ == '__main__':
     createTables()
@@ -155,3 +259,7 @@ if __name__ == '__main__':
     with open("csr.pem", "rb") as f:
         data = f.read()
     updateCert("admin", data)
+    retrieveCert('admin')
+    revokeCert('admin')
+    #print(isValid('admin', '538079311616132818443223405735271466966159773728'))
+    print(getRevocationList())
