@@ -1,5 +1,6 @@
 from db import db
 from Models.user import User
+from Models.revocation import Revocation
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives import hashes
@@ -7,6 +8,7 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.x509.oid import NameOID
 from cryptography import x509
 import datetime
+import cryptography
 from functools import reduce
 
 PRIVATE_KEY_PASS = bytes ("SecurePassphrase", 'utf-8')
@@ -91,6 +93,9 @@ class Certificate(db.Model):
     def get_certificate(self):
         return cryptography.x509.load_pem_x509_certificate(self.data, default_backend())
 
+    def serial_number(self):
+        return self.get_certificate().serial_number
+
     def not_valid_after(self):
         return self.get_certificate().not_valid_after
 
@@ -103,16 +108,27 @@ class Certificate(db.Model):
             return False
         return True
 
+    def revoke(self):
+        if self.revocation:
+            return None
+        revocation = Revocation(self.id)
+        revocation.save_to_db()
+        return revocation
+
     @classmethod
-    def get_by_user(cls, user_id=None, user=None):
+    def get_all_valid_by_user(cls, user_id=None, user=None):
         certs = None
         if user_id:
-            certs = cls.query.filter_by(user_id=user_id).all()
+            certs =cls.query.filter_by(user_id=user_id).all()
         else:
             certs = cls.query.filter_by(user=user).all()
         if len(certs) < 1:
             return None
-        certs = filter(lambda x: x.is_valid, certs)
+        return filter(lambda x: x.is_valid, certs)
+
+    @classmethod
+    def get_by_user(cls, user_id=None, user=None):
+        certs = cls.get_all_by_user(user_id, user)
         try:
             return reduce(lambda x,y: x if (x.not_valid_after()>y.not_valid_after()) else y, certs)
         except:

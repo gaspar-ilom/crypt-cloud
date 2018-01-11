@@ -12,6 +12,11 @@ class Certificate(Resource):
         required=False,
         help="Certificate Request Data in PEM Encoding!"
     )
+    parser.add_argument('cert_serial',
+        type=int,
+        required=False,
+        help="Certificate serial number to delete!"
+    )
 
     @login_required
     def get(self, username):
@@ -36,11 +41,23 @@ class Certificate(Resource):
         cert.save_to_db()
         return cert.json()
 
-
-    @login_required
-    def put(self, username):
-        pass
-
     @login_required
     def delete(self, username):
-        pass
+        if not username==User.get_username_by_id(session["user_id"]):
+            return {'message': "You may not delete another user's certificate."}, 400
+        data = self.parser.parse_args()
+        certs = list(CertModel.get_all_valid_by_user(user=User.find_by_name(username)))
+        if len(certs) < 1:
+            return {'message': "No valid certificate for user found."}, 404
+        if data['cert_serial']:
+            cert = list(filter(lambda x: x.serial_number()==data['cert_serial'], certs))
+            if len(cert) < 1:
+                return {'message': "No valid certificate with the given id found."}, 404
+            r = cert[0].revoke()
+            if r:
+                return r.json()
+            return {'message': "No valid certificate with the given id found."}, 404
+        else:
+            #revoke all of the user's certificates
+            print("here")
+            return {'revocations': list(map(lambda x: x.revoke().json(), certs))}
