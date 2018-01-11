@@ -3,7 +3,7 @@ from flask_restful import Api
 from flask_security import login_required
 from security import user_datastore, getSecurity
 from Resources.certificate import Certificate
-from Models.certificate import Certificate as cMod
+from Models.certificate import Certificate as cm
 from Models.revocation import Revocation
 
 app = Flask(__name__)
@@ -14,6 +14,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://flask-server:test123@localhost/
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECURITY_REGISTERABLE'] = True
 app.config['SECURITY_USER_IDENTITY_ATTRIBUTES'] = ('username', 'email')
+
 
 security = getSecurity(app)
 api = Api(app)

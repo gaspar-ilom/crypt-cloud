@@ -9,6 +9,6 @@ class Revocation(db.Model):
     # def __init__(self, date, cert_id):
     #     self.revocation_date = date
     #     self.cert_id = cert_id
-    
+
     def json(self):
         return {'cert_id': self.cert_id, 'certificate': self.certificate.data, 'revocation_date': self.revocation_date}
