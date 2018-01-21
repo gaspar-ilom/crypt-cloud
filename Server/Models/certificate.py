@@ -85,6 +85,7 @@ class Certificate(db.Model):
             # Our certificate will be valid for 2 years
                 datetime.datetime.utcnow() + datetime.timedelta(days=(2*365))
             ).sign(privateKey, hashes.SHA512(), default_backend())
+            print(cert.serial_number)
             data = cert.public_bytes(serialization.Encoding.PEM)
             return Certificate(data, user_id)
         except:
@@ -110,10 +111,21 @@ class Certificate(db.Model):
 
     def revoke(self):
         if self.revocation:
-            return None
+            return self.revocation
         revocation = Revocation(self.id)
         revocation.save_to_db()
-        return revocation
+        return self
+
+    def create_revocation_object(self):
+        if not self.revocation:
+            return None
+        revoked_cert = x509.RevokedCertificateBuilder().serial_number(
+            self.get_certificate().serial_number
+        ).revocation_date(
+            datetime.datetime.strptime(str(self.revocation.revocation_date), '%Y-%m-%d')
+        ).build(default_backend())
+        return revoked_cert
+
 
     @classmethod
     def get_all_valid_by_user(cls, user_id=None, user=None):
@@ -124,11 +136,22 @@ class Certificate(db.Model):
             certs = cls.query.filter_by(user=user).all()
         if len(certs) < 1:
             return None
-        return filter(lambda x: x.is_valid, certs)
+        return filter(lambda x: x.is_valid(), certs)
+
+    @classmethod
+    def get_all_invalid_by_user(cls, user_id=None, user=None):
+        certs = None
+        if user_id:
+            certs =cls.query.filter_by(user_id=user_id).all()
+        else:
+            certs = cls.query.filter_by(user=user).all()
+        if len(certs) < 1:
+            return None
+        return filter(lambda x: not x.is_valid, certs)
 
     @classmethod
     def get_by_user(cls, user_id=None, user=None):
-        certs = cls.get_all_by_user(user_id, user)
+        certs = cls.get_all_valid_by_user(user_id, user)
         try:
             return reduce(lambda x,y: x if (x.not_valid_after()>y.not_valid_after()) else y, certs)
         except:

@@ -3,8 +3,9 @@ from flask_restful import Api
 from flask_security import login_required
 from security import user_datastore, getSecurity
 from Resources.certificate import Certificate
+from Resources.revocation_list import RevocationList
 from Models.certificate import Certificate as cm
-from Models.revocation import Revocation
+from Models.revocation import Revocation as rm
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '!ThisShouldBeRandom_123456$%)(#X^'
@@ -43,9 +44,8 @@ def foo():
     return 'Hello Foo!'
 
 #Api Resources
-#api.add_resource(Data, '/myData/') # needs redirect to users data
-#api.add_resource(Data, '/myData/<string:username>')
 api.add_resource(Certificate, '/certificate/<string:username>')
+api.add_resource(RevocationList, '/revocation_list/<string:username>')
 
 
 

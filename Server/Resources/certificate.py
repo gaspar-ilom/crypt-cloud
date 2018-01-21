@@ -3,6 +3,7 @@ from flask_security import login_required
 from flask import session
 from Models.user import User
 from Models.certificate import Certificate as CertModel
+from Resources.revocation_list import RevocationList
 
 class Certificate(Resource):
 
@@ -50,14 +51,9 @@ class Certificate(Resource):
         if len(certs) < 1:
             return {'message': "No valid certificate for user found."}, 404
         if data['cert_serial']:
-            cert = list(filter(lambda x: x.serial_number()==data['cert_serial'], certs))
-            if len(cert) < 1:
+            certs = list(filter(lambda x: x.serial_number()==data['cert_serial'], certs))
+            if len(certs) < 1:
                 return {'message': "No valid certificate with the given id found."}, 404
-            r = cert[0].revoke()
-            if r:
-                return r.json()
-            return {'message': "No valid certificate with the given id found."}, 404
-        else:
-            #revoke all of the user's certificates
-            print("here")
-            return {'revocations': list(map(lambda x: x.revoke().json(), certs))}
+        #revoke all of the user's certificates
+        certs = list(map(lambda x: x.revoke(), certs))
+        return {'username': username, 'revoked_certificate_list': RevocationList.create_revocation_list(certs)}

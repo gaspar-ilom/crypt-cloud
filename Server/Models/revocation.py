@@ -17,12 +17,3 @@ class Revocation(db.Model):
 
     def json(self):
         return {'cert_id': self.cert_id, 'certificate': self.certificate.json(), 'revocation_date': str(self.revocation_date)}
-
-    # @classmethod
-    # def create(cls, cert_id, certificate):
-    #     revoked_cert = x509.RevokedCertificateBuilder().serial_number(
-    #         certificate.serial_number
-    #     ).revocation_date(
-    #         datetime.datetime.utcnow()
-    #     ).build(default_backend())
-    #     return Revocation(revoked_cert, cert_id)
