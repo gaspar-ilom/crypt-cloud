@@ -3,7 +3,7 @@ from flask_security import login_required
 from flask import session
 from Models.user import User
 from Models.certificate import Certificate as CertModel
-from Resources.revocation_list import RevocationList
+from Models.revocation_list import RevocationList
 
 class Certificate(Resource):
 
@@ -56,4 +56,6 @@ class Certificate(Resource):
                 return {'message': "No valid certificate with the given id found."}, 404
         #revoke all of the user's certificates
         certs = list(map(lambda x: x.revoke(), certs))
-        return {'username': username, 'revoked_certificate_list': RevocationList.create_revocation_list(certs)}
+        #returns the revocation list, which only includes the certificates revoked by this request
+        #previously revoked certificates are not includede in the returned list!
+        return RevocationList(username, certs).json()

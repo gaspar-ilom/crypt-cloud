@@ -16,10 +16,8 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECURITY_REGISTERABLE'] = True
 app.config['SECURITY_USER_IDENTITY_ATTRIBUTES'] = ('username', 'email')
 
-
 security = getSecurity(app)
 api = Api(app)
-
 
 @app.before_first_request
 def create_tables():
@@ -46,8 +44,6 @@ def foo():
 #Api Resources
 api.add_resource(Certificate, '/certificate/<string:username>')
 api.add_resource(RevocationList, '/revocation_list/<string:username>')
-
-
 
 if __name__ == '__main__':
     from db import db

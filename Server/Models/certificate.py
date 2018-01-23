@@ -10,40 +10,7 @@ from cryptography import x509
 import datetime
 import cryptography
 from functools import reduce
-
-PRIVATE_KEY_PASS = bytes ("SecurePassphrase", 'utf-8')
-ISSUER = x509.Name([
-    x509.NameAttribute(NameOID.COUNTRY_NAME, u"DE"),
-    x509.NameAttribute(NameOID.STATE_OR_PROVINCE_NAME, u"Berlin"),
-    x509.NameAttribute(NameOID.LOCALITY_NAME, u"Berlin"),
-    x509.NameAttribute(NameOID.ORGANIZATION_NAME, u"crypt-cloud"),
-    x509.NameAttribute(NameOID.COMMON_NAME, u"crypt-cloud"),
-    ])
-
-def loadPrivateKey():
-    #only create private key if not stored in file on disk!
-    try:
-        f = open("privateKey.pem", "rb")
-        data = f.read()
-        f.close()
-        return serialization.load_pem_private_key(data, PRIVATE_KEY_PASS, default_backend())
-    except FileNotFoundError:
-        # Generate our key on first use
-        key = rsa.generate_private_key(
-            public_exponent=65537,
-            key_size=4096,
-            backend=default_backend()
-            )
-        # Write our key to disk for safe keeping -> should be stored securely in production
-        with open("privateKey.pem", "wb") as f:
-            f.write(key.private_bytes(
-            encoding=serialization.Encoding.PEM,
-            format=serialization.PrivateFormat.TraditionalOpenSSL,
-            encryption_algorithm=serialization.BestAvailableEncryption(PRIVATE_KEY_PASS),
-            ))
-        return key
-
-privateKey = loadPrivateKey()
+from pki import privateKey, issuer
 
 class Certificate(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
@@ -74,7 +41,7 @@ class Certificate(db.Model):
             cert = x509.CertificateBuilder().subject_name(
                 csr.subject
             ).issuer_name(
-                ISSUER
+                issuer
             ).public_key(
                 csr.public_key()
             ).serial_number(
@@ -85,7 +52,7 @@ class Certificate(db.Model):
             # Our certificate will be valid for 2 years
                 datetime.datetime.utcnow() + datetime.timedelta(days=(2*365))
             ).sign(privateKey, hashes.SHA512(), default_backend())
-            print(cert.serial_number)
+            # print(cert.serial_number)
             data = cert.public_bytes(serialization.Encoding.PEM)
             return Certificate(data, user_id)
         except:
