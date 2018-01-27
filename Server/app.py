@@ -14,6 +14,7 @@ app.config['SECURITY_PASSWORD_SALT'] = '!ThisShouldBeRandom_123456$%)(#X^'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://flask-server:test123@localhost/flaskserver'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECURITY_REGISTERABLE'] = True
+app.config['SECURITY_SEND_REGISTER_EMAIL'] = False
 app.config['SECURITY_USER_IDENTITY_ATTRIBUTES'] = ('username', 'email')
 
 security = getSecurity(app)
