@@ -1,6 +1,5 @@
 from Resources.user import User
-
-USER = User.load()
+from getpass import getpass
 
 # generate_certificate()
 # revoke_certificate()
@@ -11,9 +10,21 @@ USER = User.load()
 if __name__ == '__main__':
     print("Starting client...")
     from connection import CONN
-    if not USER:
-        USER = User("bl2a","bl2asdasda@wurst.de","test123")
-        USER.register()
+    USER = User.load()
+    while not USER:
+        username = input('Register new Account\nUsername: ')
+        email = input('Email: ')
+        password = getpass()
+        password_confirm = getpass('Retype Password: ')
+        if not password == password_confirm:
+            print("Passwords do not match.")
+            continue
+        USER = User(username, email, password)
+        if not USER.register():
+            print("Username or email is already taken. Please choose another username and/or email.")
+            USER = None
+    if USER.login():
+        print("Logged in as '{}'".format(USER.username))
 
     while 1:
         cmd = input('input command (ex. help): ')
@@ -39,5 +50,7 @@ if __name__ == '__main__':
             data_received = rsp.read()
             print(data_received)
 
+    if USER.logout():
+        print("Logged out.")
     CONN.close()
-    print("Closing client...")
+    print("Client closed.")
