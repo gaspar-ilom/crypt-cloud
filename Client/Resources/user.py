@@ -1,6 +1,7 @@
 import json
 from bs4 import BeautifulSoup as bs
-from connection import SERVER_HOST, SERVER_PORT, SESSION
+from connection import CONN
+from PKI.private_key import PRIVATE_KEY
 
 class User(object):
     username = None
@@ -40,9 +41,24 @@ class User(object):
         # print(token[0])
         self.csrf_token = token[0]
 
+    def get_private_key(self):
+        self.private_key = PRIVATE_KEY.get()
+
+    def get_certificate(self):
+        csr = PRIVATE_KEY.createCSR(self.username)
+        payload = {
+            'csr': str(csr, 'utf-8')
+        }
+        resp = CONN.post('/certificate/'+self.username, data=payload)
+        if resp.status_code == 200:
+            self.certificate = json.loads(resp.text)['certificate']
+            print (self.certificate)
+            return True
+        print(resp)
+
     def register(self):
         resource = '/register'
-        resp = SESSION.get('http://'+SERVER_HOST+':'+SERVER_PORT+resource)
+        resp = CONN.get(resource)
         self.set_csrf_token(resp)
         payload = {
             'email': self.email,
@@ -52,7 +68,7 @@ class User(object):
             'remember': 'y',
             'csrf_token': self.csrf_token,
             }
-        response_post = SESSION.post('http://'+SERVER_HOST+':'+SERVER_PORT+resource, data=payload)
+        response_post = CONN.post(resource, data=payload)
         if response_post.status_code == 200:
             self.save()
             return True
@@ -60,7 +76,7 @@ class User(object):
 
     def login(self):
         resource = '/login'
-        resp = SESSION.get('http://'+SERVER_HOST+':'+SERVER_PORT+resource)
+        resp = CONN.get(resource)
         self.set_csrf_token(resp)
         payload = {
             'email': self.email,
@@ -69,22 +85,15 @@ class User(object):
             'remember': 'y',
             'csrf_token': self.csrf_token,
             }
-        response_post = SESSION.post('http://'+SERVER_HOST+':'+SERVER_PORT+resource, data=payload)
+        response_post = CONN.post(resource, data=payload)
         if response_post.status_code == 200:
             return True
         print(response_post)
 
     def logout(self):
         resource = '/logout'
-        resp = SESSION.get('http://'+SERVER_HOST+':'+SERVER_PORT+resource)
+        resp = CONN.get(resource)
         if resp.status_code == 200:
             self.csrf_token = None
             return True
-        print(resp.text)
-
-    def get(self, resource):
-        resp = SESSION.get('http://'+SERVER_HOST+':'+SERVER_PORT+resource)
-        if resp.status_code == 200:
-            return resp.text
-        print(resp.status_code)
         print(resp.text)

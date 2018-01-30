@@ -4,37 +4,41 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
-
-PRIVATE_KEY_PASS = bytes ("MySecurePassphrase", 'utf-8')
+from Configuration.settings import PRIVATE_KEY_PASS
 
 class PrivateKey(object): #inherit from RSA key?
     key = None
+    certificate = None
 
     def __init__(self):
         self.key = self.load()
         if not self.key:
             self.key = self.generate()
 
+    def get():
+        return self.key
 
     # Generate/load our private key
-    def load():
+    @classmethod
+    def load(cls):
         #only create private key if not stored in file on disk!
         try:
-            f = open("myPrivateKey.pem", "rb")
+            f = open("Configuration/myPrivateKey.pem", "rb")
             data = f.read()
             f.close()
             return serialization.load_pem_private_key(data, PRIVATE_KEY_PASS, default_backend())
         except FileNotFoundError:
             return None
 
-    def generate():
+    @classmethod
+    def generate(cls):
         key = rsa.generate_private_key(
             public_exponent=65537,
             key_size=4096,
             backend=default_backend()
             )
         # Write our key to disk for safe keeping -> should be stored securely in production
-        with open("myPrivateKey.pem", "wb") as f:
+        with open("Configuration/myPrivateKey.pem", "wb") as f:
             f.write(key.private_bytes(
             encoding=serialization.Encoding.PEM,
             format=serialization.PrivateFormat.TraditionalOpenSSL,
@@ -46,7 +50,7 @@ class PrivateKey(object): #inherit from RSA key?
         pass
 
     # Generate a CSR, write it to file and return it
-    def createCSR(self, USERNAME):
+    def createCSR(self, username):
         csr = x509.CertificateSigningRequestBuilder().subject_name(x509.Name([
             # Provide details about who we are: just username. Email could be added
             x509.NameAttribute(NameOID.COMMON_NAME, username),
@@ -54,9 +58,8 @@ class PrivateKey(object): #inherit from RSA key?
         ])).sign(privateKey, hashes.SHA512(), default_backend())
         csr = csr.public_bytes(serialization.Encoding.PEM)
         # Write our CSR out to disk.
-        with open("csr.pem", "wb") as f:
+        with open("Configuration/csr.pem", "wb") as f:
             f.write(csr)
         return csr
 
-    def requestCertificate(self):
-        csr = self.createCSR()
+PRIVATE_KEY = PrivateKey()
