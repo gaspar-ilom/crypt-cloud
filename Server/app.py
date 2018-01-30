@@ -26,13 +26,12 @@ def create_tables():
     db.session.commit()
 
 @app.route('/')
-#@login_required
 def index():
     # just testing login...
     try:
-        return escape(user_datastore.get_user(session["user_id"]).get_security_payload()['username'])
+        return escape("Logged in as {}.".format(user_datastore.get_user(session["user_id"]).get_security_payload()['username']))
     except:
-        return "Something did not work. Logged in?"
+        return "Not logged in.", 401
 
 @app.route('/redir-test')
 def hello():

@@ -11,16 +11,14 @@ class PrivateKey(object): #inherit from RSA key?
     certificate = None
 
     def __init__(self):
-        self.key = self.load()
+        self.key = self.load_key()
         if not self.key:
-            self.key = self.generate()
-
-    def get():
-        return self.key
+            self.key = self.generate_key()
+        self.certificate = self.load_certificate()
 
     # Generate/load our private key
     @classmethod
-    def load(cls):
+    def load_key(cls):
         #only create private key if not stored in file on disk!
         try:
             f = open("Configuration/myPrivateKey.pem", "rb")
@@ -31,7 +29,7 @@ class PrivateKey(object): #inherit from RSA key?
             return None
 
     @classmethod
-    def generate(cls):
+    def generate_key(cls):
         key = rsa.generate_private_key(
             public_exponent=65537,
             key_size=4096,
@@ -46,6 +44,21 @@ class PrivateKey(object): #inherit from RSA key?
             ))
         return key
 
+    def load_certificate(self):
+        #only create certificate if not stored in file on disk!
+        try:
+            f = open("Configuration/myCertificate.pem", "rb")
+            data = f.read()
+            f.close()
+            return x509.load_pem_x509_certificate(data, default_backend())
+        except FileNotFoundError:
+            return None
+
+    def set_certificate(self, certificate):
+        self.certificate = x509.load_pem_x509_certificate(certificate, default_backend())
+        with open("Configuration/myCertificate.pem", "wb") as f:
+            f.write(certificate)
+
     def revoke():
         pass
 
@@ -55,11 +68,9 @@ class PrivateKey(object): #inherit from RSA key?
             # Provide details about who we are: just username. Email could be added
             x509.NameAttribute(NameOID.COMMON_NAME, username),
             x509.NameAttribute(NameOID.USER_ID, username),
-        ])).sign(privateKey, hashes.SHA512(), default_backend())
+        ])).sign(self.key, hashes.SHA512(), default_backend())
         csr = csr.public_bytes(serialization.Encoding.PEM)
         # Write our CSR out to disk.
         with open("Configuration/csr.pem", "wb") as f:
             f.write(csr)
         return csr
-
-PRIVATE_KEY = PrivateKey()

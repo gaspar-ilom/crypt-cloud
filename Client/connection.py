@@ -14,24 +14,16 @@ class Connection(object):
 
     def get(self, resource, data=None):
         resp = self.session.get(self.server+resource)
-        if resp.status_code == 200:
-            return resp
-        print(resp.status_code)
-        print(resp.text)
+        return resp
 
     def post(self, resource, data=None):
         resp = self.session.post(self.server+resource, data=data)
-        if resp.status_code == 200:
-            return resp
-        print(resp.status_code)
-        print(resp.text)
+        return resp
 
     def delete(self, resource, data=None):
         resp = self.session.delete(self.server+resource, data=data)
-        if resp.status_code == 200:
-            return resp
-        print(resp.status_code)
-        print(resp.text)
+        return resp
 
 #Use for Singleton Session
+# Session() makes sure cookies persist, while multiple TCP Connections are opened, increasing performance in case of multiple requests
 CONN = Connection()

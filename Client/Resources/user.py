@@ -1,13 +1,12 @@
 import json
 from bs4 import BeautifulSoup as bs
 from connection import CONN
-from PKI.private_key import PRIVATE_KEY
+from PKI.private_key import PrivateKey
 
 class User(object):
     username = None
     email = None
     password = None
-    certificate = None
     csrf_token = None
     private_key = None
 
@@ -21,7 +20,6 @@ class User(object):
         return self.username
 
     def save(self):
-        #TODO maybe append user config so it can manage several users?
         with open("Configuration/user.conf", "w") as f:
             f.write(self.username +" "+ self.email + " " + self.password + '\n')
 
@@ -30,7 +28,10 @@ class User(object):
         try:
             with open("Configuration/user.conf", "r") as f:
                 data = f.read().split()
-            return User(data[0], data[1], data[2])
+            user = User(data[0], data[1], data[2])
+            user.login()
+            user.set_private_key()
+            return user
         except FileNotFoundError:
             return None
 
@@ -38,21 +39,22 @@ class User(object):
         soup = bs(resp.text, "html.parser")
         token = [n['value'] for n in soup.find_all('input')
                  if n['name'] == 'csrf_token']
-        # print(token[0])
         self.csrf_token = token[0]
 
-    def get_private_key(self):
-        self.private_key = PRIVATE_KEY.get()
+    def set_private_key(self):
+        self.private_key = PrivateKey()
+        if not self.private_key.certificate:
+            self.get_certificate()
 
     def get_certificate(self):
-        csr = PRIVATE_KEY.createCSR(self.username)
+        csr = self.private_key.createCSR(self.username)
         payload = {
             'csr': str(csr, 'utf-8')
         }
         resp = CONN.post('/certificate/'+self.username, data=payload)
         if resp.status_code == 200:
-            self.certificate = json.loads(resp.text)['certificate']
-            print (self.certificate)
+            cert = resp.json()['certificate']
+            self.private_key.set_certificate(bytes(cert, 'utf-8'))
             return True
         print(resp)
 
@@ -69,14 +71,16 @@ class User(object):
             'csrf_token': self.csrf_token,
             }
         response_post = CONN.post(resource, data=payload)
-        if response_post.status_code == 200:
+        if response_post.text == "Logged in as {}.".format(self.username):
             self.save()
-            return True
+            return self.login()
         print(response_post)
 
     def login(self):
         resource = '/login'
         resp = CONN.get(resource)
+        if resp.text == "Logged in as {}.".format(self.username):
+            return True
         self.set_csrf_token(resp)
         payload = {
             'email': self.email,
@@ -88,12 +92,11 @@ class User(object):
         response_post = CONN.post(resource, data=payload)
         if response_post.status_code == 200:
             return True
-        print(response_post)
 
     def logout(self):
         resource = '/logout'
         resp = CONN.get(resource)
-        if resp.status_code == 200:
+        if resp.text == "Not logged in.":
             self.csrf_token = None
             return True
         print(resp.text)

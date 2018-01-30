@@ -16,11 +16,16 @@ if __name__ == '__main__':
         email = input('Email: ')
         password = getpass()
         password_confirm = getpass('Retype Password: ')
+        if len(password) < 6:
+            print("Password must have at least 6 characters.")
+            continue
         if not password == password_confirm:
             print("Passwords do not match.")
             continue
         USER = User(username, email, password)
-        if not USER.register():
+        if USER.register():
+            USER.set_private_key()
+        else:
             print("Username or email is already taken. Please choose another username and/or email.")
             USER = None
     if USER.login():
@@ -45,6 +50,7 @@ if __name__ == '__main__':
         else:
             print("Invalid command. Type 'help' for a list of commands.")
 
+    USER.get_certificate()
     if USER.logout():
         print("Logged out.")
     else:
