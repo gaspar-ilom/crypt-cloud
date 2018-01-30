@@ -1,9 +1,7 @@
 from connection import CONN, HEADERS
-import json
-import requests
+import json, requests, pathlib
 from bs4 import BeautifulSoup as bs
 from connection import SERVER_HOST, SERVER_PORT
-
 
 class User(object):
     username = None
