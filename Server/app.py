@@ -1,4 +1,4 @@
-from flask import Flask, session, escape, redirect, url_for#, request, jsonify, make_response
+from flask import Flask, session, escape, redirect, url_for
 from flask_restful import Api
 from flask_security import login_required
 from security import user_datastore, getSecurity
