@@ -9,7 +9,6 @@ from getpass import getpass
 
 if __name__ == '__main__':
     print("Starting client...")
-    from connection import CONN
     USER = User.load()
     while not USER:
         username = input('Register new Account\nUsername: ')
@@ -30,27 +29,27 @@ if __name__ == '__main__':
         cmd = input('input command (ex. help): ')
         cmd = cmd.split()
 
-        if cmd[0] == 'q' or cmd[0] == 'quit': #tipe quit to end it
+        if cmd[0] in ['q', 'quit', 'quit()', 'exit']: #tipe quit to end it
             break
         if cmd[0] == 'help':
             print(" --- Command Overview --- ")
             print ("help - display this help text")
             print("quit - close client")
-            print("request - request http resource. Use: request HTTP_METHOD URI")
-            print("response - retrieve response from server")
+            print("GET - request http resource. Use: GET URI")
+            #print("response - retrieve response from server")
 
-        if cmd[0] == 'request':
+        if cmd[0] == 'GET':
             #request command to server
-            CONN.request(cmd[1], cmd[2])
-        if cmd[0] == 'response':
-            #get response from server
-            rsp = CONN.getresponse()
-            #print server response and data
-            print(rsp.status, rsp.reason)
-            data_received = rsp.read()
-            print(data_received)
+            USER.get(cmd[1])
+        # if cmd[0] in ['r', 'resp', 'response']:
+        #     #get response from server
+        #     rsp = CONN.getresponse()
+        #     #print server response and data
+        #     print(rsp.status, rsp.reason)
+        #     data_received = rsp.read()
+        #     print(data_received)
 
+    USER.get('/certificate/admin')
     if USER.logout():
         print("Logged out.")
-    CONN.close()
     print("Client closed.")
