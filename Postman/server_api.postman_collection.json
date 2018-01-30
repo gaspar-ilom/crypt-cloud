@@ -58,35 +58,15 @@
 			"name": "http://127.0.0.1:5000/login",
 			"request": {
 				"method": "POST",
-				"header": [],
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
 				"body": {
-					"mode": "formdata",
-					"formdata": [
-						{
-							"key": "csrf_token",
-							"value": "IjIzYTk0Y2Y0Y2M0OTlkMTc4OWRiM2VjNzcxZmQwNjlkN2QxNDg0ZDEi.DUaA7w.9Xs-8aMGpJY5gjVNiiTT4eMDVio",
-							"description": "",
-							"type": "text"
-						},
-						{
-							"key": "email",
-							"value": "admin",
-							"description": "",
-							"type": "text"
-						},
-						{
-							"key": "password",
-							"value": "test123",
-							"description": "",
-							"type": "text"
-						},
-						{
-							"key": "remember",
-							"value": "y",
-							"description": "",
-							"type": "text"
-						}
-					]
+					"mode": "raw",
+					"raw": "{\n    \"csrf_token\": \"IjIzYTk0Y2Y0Y2M0OTlkMTc4OWRiM2VjNzcxZmQwNjlkN2QxNDg0ZDEi.DU4EqQ.wRBOLkhe2KbB4QAsNKNK0f6SbTE\",\n    \"email\": \"admin\",\n    \"password\": \"test123\",\n    \"remember\": \"y\"\n}"
 				},
 				"url": {
 					"raw": "http://127.0.0.1:5000/login",
@@ -328,6 +308,200 @@
 					]
 				},
 				"description": "delete just one certificate"
+			},
+			"response": []
+		},
+		{
+			"name": "http://127.0.0.1:5000/logout",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "csrf_token",
+							"value": "IjIzYTk0Y2Y0Y2M0OTlkMTc4OWRiM2VjNzcxZmQwNjlkN2QxNDg0ZDEi.DUaA7w.9Xs-8aMGpJY5gjVNiiTT4eMDVio",
+							"description": "",
+							"type": "text"
+						},
+						{
+							"key": "email",
+							"value": "admin",
+							"description": "",
+							"type": "text"
+						},
+						{
+							"key": "password",
+							"value": "test123",
+							"description": "",
+							"type": "text"
+						},
+						{
+							"key": "remember",
+							"value": "y",
+							"description": "",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://127.0.0.1:5000/logout",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5000",
+					"path": [
+						"logout"
+					]
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "http://127.0.0.1:5000/register",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "csrf_token",
+							"value": "IjIzYTk0Y2Y0Y2M0OTlkMTc4OWRiM2VjNzcxZmQwNjlkN2QxNDg0ZDEi.DU39cw.WL_PgK9DK27SpxOajzprHFyYrVQ",
+							"description": "",
+							"type": "text"
+						},
+						{
+							"key": "email",
+							"value": "admin2@wurst.de",
+							"description": "",
+							"type": "text"
+						},
+						{
+							"key": "password",
+							"value": "test123",
+							"description": "",
+							"type": "text"
+						},
+						{
+							"key": "username",
+							"value": "admin2",
+							"description": "",
+							"type": "text"
+						},
+						{
+							"key": "password_confirm",
+							"value": "test123",
+							"description": "",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://127.0.0.1:5000/register",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5000",
+					"path": [
+						"register"
+					]
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "http://127.0.0.1:5000/register",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "csrf_token",
+							"value": "IjIzYTk0Y2Y0Y2M0OTlkMTc4OWRiM2VjNzcxZmQwNjlkN2QxNDg0ZDEi.DUaA7w.9Xs-8aMGpJY5gjVNiiTT4eMDVio",
+							"description": "",
+							"type": "text"
+						},
+						{
+							"key": "email",
+							"value": "admin",
+							"description": "",
+							"type": "text"
+						},
+						{
+							"key": "password",
+							"value": "test123",
+							"description": "",
+							"type": "text"
+						},
+						{
+							"key": "remember",
+							"value": "y",
+							"description": "",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://127.0.0.1:5000/register",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5000",
+					"path": [
+						"register"
+					]
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "http://127.0.0.1:5000/register",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"remember\": \"y\",\n\t\"csrf_token\": \"IjIzYTk0Y2Y0Y2M0OTlkMTc4OWRiM2VjNzcxZmQwNjlkN2QxNDg0ZDEi.DU4Wbw.hidoaJmY1fRoVayPeug3MFxxubI\",\n\t\"password_confirm\": \"test123\",\n\t\"email\": \"bla@wurst.de\",\n\t\"username\": \"bla\",\n\t\"password\": \"test123\"\n\t\n}"
+				},
+				"url": {
+					"raw": "http://127.0.0.1:5000/register",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5000",
+					"path": [
+						"register"
+					]
+				},
+				"description": ""
 			},
 			"response": []
 		}

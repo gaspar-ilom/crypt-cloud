@@ -58,6 +58,20 @@ class User(object):
             return True
         print(resp)
 
+    def revoke_certificate(self, private_key=None):
+        data = None
+        if private_key:
+            data = json.dumps({"cert_serial":str(private_key.certificate.serial_number, 'utf-8')})
+            private_key.revoke()
+        resp = CONN.delete('/certificate/'+self.username, data=data)
+        #TODO verify signature from Cert Authority
+        if not private_key:
+            self.private_key.revoke()
+        print(resp.text)
+        # crl = cryptography.x509.load_pem_x509_crl(resp.json()['revocation_list'], backend)
+        # if crl.is_signature_valid(public_key):
+        #     return True
+
     def register(self):
         resource = '/register'
         resp = CONN.get(resource)

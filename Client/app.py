@@ -2,11 +2,9 @@ from Resources.user import User
 from getpass import getpass
 from connection import CONN
 
-# generate_certificate()
 # revoke_certificate()
 # get_certificate(username)
 # get_revocation_list(username)
-
 
 if __name__ == '__main__':
     print("Starting client...")
@@ -26,10 +24,10 @@ if __name__ == '__main__':
         if USER.register():
             USER.set_private_key()
         else:
-            print("Username or email is already taken. Please choose another username and/or email.")
+            print("\nUsername or email is already taken. Please choose another username and/or email.")
             USER = None
     if USER.login():
-        print("Logged in as {}.".format(USER.username))
+        print("Logged in as {}.\n".format(USER.username))
 
     while 1:
         cmd = input('Input command (ex. help): ')
@@ -43,14 +41,19 @@ if __name__ == '__main__':
             print ("help - display this help text")
             print("quit - close client")
             print("GET - request http resource. Use: GET URI\n")
-
-        elif cmd[0] == 'GET':
+        elif cmd[0] == 'revoke':
+            USER.revoke_certificate()
+        elif len(cmd) > 1 and cmd[0] in ['GET', 'POST', 'DELETE']:
             #request command to server
-            CONN.get(cmd[1])
+            if cmd[0] == 'GET':
+                print(CONN.get(cmd[1]).json())
+            elif cmd[0] == 'POST':
+                print(CONN.post(cmd[1]).json())
+            elif cmd[0] == 'DELETE':
+                print(CONN.delete(cmd[1]).json())
         else:
-            print("Invalid command. Type 'help' for a list of commands.")
+            print("Invalid command. Type 'help' for a list of commands.\n")
 
-    USER.get_certificate()
     if USER.logout():
         print("Logged out.")
     else:

@@ -5,6 +5,7 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 from Configuration.settings import PRIVATE_KEY_PASS
+from os import remove
 
 class PrivateKey(object): #inherit from RSA key?
     key = None
@@ -59,8 +60,12 @@ class PrivateKey(object): #inherit from RSA key?
         with open("Configuration/myCertificate.pem", "wb") as f:
             f.write(certificate)
 
-    def revoke():
-        pass
+    def revoke(self):
+        remove("Configuration/myCertificate.pem")
+        remove("Configuration/myPrivateKey.pem")
+        self.key = None
+        self.certificate = None
+        return True
 
     # Generate a CSR, write it to file and return it
     def createCSR(self, username):
@@ -71,6 +76,6 @@ class PrivateKey(object): #inherit from RSA key?
         ])).sign(self.key, hashes.SHA512(), default_backend())
         csr = csr.public_bytes(serialization.Encoding.PEM)
         # Write our CSR out to disk.
-        with open("Configuration/csr.pem", "wb") as f:
-            f.write(csr)
+        # with open("Configuration/csr.pem", "wb") as f:
+        #     f.write(csr)
         return csr
