@@ -5,7 +5,9 @@ from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.exceptions import InvalidSignature
 from cryptography.x509.oid import NameOID
 from cryptography.hazmat.primitives import serialization
-import codecs, os, datetime
+import codecs, os, datetime, pathlib
+
+pathlib.Path('Configuration/Certificates/').mkdir(parents=True, exist_ok=True)
 
 def get_CA_key():
     f = open("Configuration/CA.pem", "rb")
@@ -55,15 +57,18 @@ class Certificate(object):
     @classmethod
     def load_list(cls):
         cert_list = {}
-        with open("Configuration/certificate_list", "r") as f:
-            for line in f.readlines():
-                line = line[:-1].split(':')
-                v = False
-                if line[1] == 'True':
-                    v = True
-                cert = cls.load(line[0])
-                assert(cert.fingerprint(cert.signature_hash_algorithm).hex() == line[2])
-                cert_list.update({line[0]:Certificate(v, cert)})
+        try:
+            with open("Configuration/certificate_list", "r") as f:
+                for line in f.readlines():
+                    line = line[:-1].split(':')
+                    v = False
+                    if line[1] == 'True':
+                        v = True
+                    cert = cls.load(line[0])
+                    assert(cert.fingerprint(cert.signature_hash_algorithm).hex() == line[2])
+                    cert_list.update({line[0]:Certificate(v, cert)})
+        except FileNotFoundError:
+            pass
         return cert_list
 
     #Note that certificate revocation lists are not securely implemented in the Cryptography library, as they are only based on the serial_number and not the fingerprint!
@@ -111,6 +116,7 @@ class Certificate(object):
             c = certificate_list[username]
             if not c.is_valid():
                 certificate_list.pop(username, None)
+                os.remove("Configuration/Certificates/"+username+".pem")
                 with open("Configuration/certificate_list", "r") as input:
                     with open("Configuration/new_certificate_list","wb") as output:
                         for line in input:

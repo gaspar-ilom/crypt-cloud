@@ -2,8 +2,6 @@ import json
 from bs4 import BeautifulSoup as bs
 from connection import CONN
 from Key_handler.private_key import PrivateKey
-import pathlib
-pathlib.Path('Configuration/Certificates/').mkdir(parents=True, exist_ok=True) 
 
 class User(object):
     username = None
