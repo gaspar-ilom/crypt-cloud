@@ -13,7 +13,7 @@ class Connection(object):
         self.session.close()
 
     def get(self, resource, data=None):
-        resp = self.session.get(self.server+resource)
+        resp = self.session.get(self.server+resource, data=data)
         return resp
 
     def post(self, resource, data=None):

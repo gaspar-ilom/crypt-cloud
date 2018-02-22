@@ -1,4 +1,4 @@
-from Resources.user import User
+from Configuration.user import User
 from getpass import getpass
 from connection import CONN
 

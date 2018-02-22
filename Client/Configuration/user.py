@@ -1,7 +1,7 @@
 import json
 from bs4 import BeautifulSoup as bs
 from connection import CONN
-from PKI.private_key import PrivateKey
+from Key_handler.private_key import PrivateKey
 
 class User(object):
     username = None
@@ -58,6 +58,7 @@ class User(object):
             return True
         print(resp)
 
+    #maybe in production use revocation_certificates oder let only those in possession of the private key revoke it
     def revoke_certificate(self, private_key=None):
         data = None
         if private_key:
