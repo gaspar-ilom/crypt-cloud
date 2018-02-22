@@ -55,6 +55,9 @@ if __name__ == '__main__':
         else:
             print("Invalid command. Type 'help' for a list of commands.\n")
 
+    c = certificate.Certificate.get('admin')
+    #certificate.Certificate.load_list()
+
     if USER.logout():
         print("Logged out.")
     else:

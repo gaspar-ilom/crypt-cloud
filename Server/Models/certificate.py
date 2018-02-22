@@ -114,7 +114,7 @@ class Certificate(db.Model):
             certs = cls.query.filter_by(user=user).all()
         if len(certs) < 1:
             return None
-        return filter(lambda x: not x.is_valid, certs)
+        return filter(lambda x: not x.is_valid(), certs)
 
     @classmethod
     def get_by_user(cls, user_id=None, user=None):

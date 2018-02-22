@@ -26,7 +26,7 @@ class RevocationList(object):
         for revoked_cert in revoke_object_list:
             builder = builder.add_revoked_certificate(revoked_cert)
         revocation_list = builder.sign(
-            private_key=privateKey, algorithm=hashes.SHA512(),
+            private_key=privateKey, algorithm=hashes.SHA256(),
             backend=default_backend()
         ).public_bytes(serialization.Encoding.PEM)
         return str(revocation_list, 'utf-8')
