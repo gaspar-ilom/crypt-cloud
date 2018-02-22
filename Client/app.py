@@ -1,6 +1,7 @@
 from Configuration.user import User
 from getpass import getpass
 from connection import CONN
+from Key_handler import certificate, private_key
 
 # revoke_certificate()
 # get_certificate(username)
