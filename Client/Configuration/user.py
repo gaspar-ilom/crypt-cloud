@@ -10,7 +10,6 @@ class User(object):
     csrf_token = None
     private_key = None
 
-
     def __init__(self, username, email, password):
         self.username = username
         self.email = email
@@ -75,7 +74,11 @@ class User(object):
 
     def register(self):
         resource = '/register'
-        resp = CONN.get(resource)
+        try:
+            resp = CONN.get(resource)
+        except:
+            print("Connection was refused. Make sure the specified server is reachable.")
+            quit()
         self.set_csrf_token(resp)
         payload = {
             'email': self.email,
@@ -93,7 +96,11 @@ class User(object):
 
     def login(self):
         resource = '/login'
-        resp = CONN.get(resource)
+        try:
+            resp = CONN.get(resource)
+        except:
+            print("Connection was refused. Make sure the specified server is reachable.")
+            quit()
         if resp.text == "Logged in as {}.".format(self.username):
             return True
         self.set_csrf_token(resp)

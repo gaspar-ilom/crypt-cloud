@@ -4,8 +4,11 @@ from flask_security import login_required
 from security import user_datastore, getSecurity
 from Resources.certificate import Certificate
 from Resources.revocation_list import RevocationList
+from Resources.smp import SMP
+from Resources.notification import Notification
 from Models.certificate import Certificate as cm
 from Models.revocation import Revocation as rm
+from Models.notification import Notification as nm
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '!ThisShouldBeRandom_123456$%)(#X^'
@@ -44,6 +47,8 @@ def foo():
 #Api Resources
 api.add_resource(Certificate, '/certificate/<string:username>')
 api.add_resource(RevocationList, '/revocation_list/<string:username>')
+api.add_resource(Notification, '/notification/<string:username>')
+#api.add_resource(SMP, '/smp/<string:initiator>_<string:replier>/<string:step>')
 
 if __name__ == '__main__':
     from db import db

@@ -56,7 +56,11 @@ if __name__ == '__main__':
             print("Invalid command. Type 'help' for a list of commands.\n")
 
     c = certificate.Certificate.get('admin')
-    #certificate.Certificate.load_list()
+    from Verifier.QRCode_verifier import QRCode_verifier as QR
+    QR(c.certificate, USER.private_key.certificate).display_qrcode()
+    print("DONE")
+    QR(c.certificate, USER.private_key.certificate).verify_qrcode()
+    print('YEAH?')
 
     if USER.logout():
         print("Logged out.")

@@ -2,11 +2,16 @@ from flask_security import Security, SQLAlchemyUserDatastore
 from Models.role import Role
 from Models.user import User
 from flask_security.forms import RegisterForm, LoginForm
-from wtforms import StringField, validators
+from wtforms import StringField, validators, ValidationError
 from db import db
 
 class ExtendedRegisterForm(RegisterForm):
     username = StringField('Username', [validators.Required()])
+
+    def validate_username(form, field):
+        if ':' in field.data or '_' in field.dat:
+            raise ValidationError("Username must not contain ':' or '_'")
+
 class ExtendedLoginForm(LoginForm):
     email = StringField('Username or Email', [validators.Required()])
 

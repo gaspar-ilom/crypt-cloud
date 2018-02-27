@@ -11,6 +11,7 @@ class User(db.Model, UserMixin):
     confirmed_at = db.Column(db.DateTime())
     roles = db.relationship('Role', secondary=roles_users, backref=db.backref('users', lazy='dynamic'))
     certificates = db.relationship('Certificate', back_populates="user")
+    notifications = db.relationship('Notification', back_populates="user")
 
     def get_security_payload(self):
         return {
