@@ -5,7 +5,7 @@ from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.exceptions import InvalidSignature
 from cryptography.x509.oid import NameOID
 from cryptography.hazmat.primitives import serialization
-import codecs, os, datetime, pathlib
+import os, datetime, pathlib
 
 pathlib.Path('Configuration/Certificates/').mkdir(parents=True, exist_ok=True)
 

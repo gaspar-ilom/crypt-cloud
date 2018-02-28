@@ -2,6 +2,7 @@ import json
 from bs4 import BeautifulSoup as bs
 from connection import CONN
 from Key_handler.private_key import PrivateKey
+from notification_handler import Notifications
 
 class User(object):
     username = None
@@ -9,11 +10,13 @@ class User(object):
     password = None
     csrf_token = None
     private_key = None
+    notifications = None
 
     def __init__(self, username, email, password):
         self.username = username
         self.email = email
         self.password = password
+        self.notifications = Notifications(username)
 
     def __repr__(self):
         return self.username
@@ -57,20 +60,16 @@ class User(object):
             return True
         print(resp)
 
-    #maybe in production use revocation_certificates oder let only those in possession of the private key revoke it
+    #maybe in production use revocation_certificates or let only those in possession of the private key revoke it
     def revoke_certificate(self, private_key=None):
         data = None
         if private_key:
             data = json.dumps({"cert_serial":str(private_key.certificate.serial_number, 'utf-8')})
-            private_key.revoke()
         resp = CONN.delete('/certificate/'+self.username, data=data)
-        #TODO verify signature from Cert Authority
         if not private_key:
-            self.private_key.revoke()
-        print(resp.text)
-        # crl = cryptography.x509.load_pem_x509_crl(resp.json()['revocation_list'], backend)
-        # if crl.is_signature_valid(public_key):
-        #     return True
+            private_key = self.private_key
+        private_key.revoke(resp)
+        return True
 
     def register(self):
         resource = '/register'
@@ -102,6 +101,7 @@ class User(object):
             print("Connection was refused. Make sure the specified server is reachable.")
             quit()
         if resp.text == "Logged in as {}.".format(self.username):
+            self.notifications.start()
             return True
         self.set_csrf_token(resp)
         payload = {
@@ -113,9 +113,11 @@ class User(object):
             }
         response_post = CONN.post(resource, data=payload)
         if response_post.status_code == 200:
+            self.notifications.start()
             return True
 
     def logout(self):
+        self.notifications.stop()
         resource = '/logout'
         resp = CONN.get(resource)
         if resp.text == "Not logged in.":

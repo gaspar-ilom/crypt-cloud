@@ -3,33 +3,29 @@ from getpass import getpass
 from connection import CONN
 from Key_handler import certificate, private_key
 
-# revoke_certificate()
-# get_certificate(username)
-# get_revocation_list(username)
+print("Starting client...")
+USER = User.load()
+while not USER:
+    username = input('Register new Account\nUsername: ')
+    email = input('Email: ')
+    password = getpass()
+    password_confirm = getpass('Retype Password: ')
+    if len(password) < 6:
+        print("Password must have at least 6 characters.")
+        continue
+    if not password == password_confirm:
+        print("Passwords do not match.")
+        continue
+    USER = User(username, email, password)
+    if USER.register():
+        USER.set_private_key()
+    else:
+        print("\nUsername or email is already taken. Please choose another username and/or email.")
+        USER = None
+if USER.login():
+    print("Logged in as {}.\n".format(USER.username))
 
 if __name__ == '__main__':
-    print("Starting client...")
-    USER = User.load()
-    while not USER:
-        username = input('Register new Account\nUsername: ')
-        email = input('Email: ')
-        password = getpass()
-        password_confirm = getpass('Retype Password: ')
-        if len(password) < 6:
-            print("Password must have at least 6 characters.")
-            continue
-        if not password == password_confirm:
-            print("Passwords do not match.")
-            continue
-        USER = User(username, email, password)
-        if USER.register():
-            USER.set_private_key()
-        else:
-            print("\nUsername or email is already taken. Please choose another username and/or email.")
-            USER = None
-    if USER.login():
-        print("Logged in as {}.\n".format(USER.username))
-
     while 1:
         cmd = input('Input command (ex. help): ')
         cmd = cmd.split()
@@ -55,12 +51,12 @@ if __name__ == '__main__':
         else:
             print("Invalid command. Type 'help' for a list of commands.\n")
 
-    c = certificate.Certificate.get('admin')
-    from Verifier.QRCode_verifier import QRCode_verifier as QR
-    QR(c.certificate, USER.private_key.certificate).display_qrcode()
-    print("DONE")
-    QR(c.certificate, USER.private_key.certificate).verify_qrcode()
-    print('YEAH?')
+    # c = certificate.Certificate.get('admin')
+    # from Verifier.QRCode_verifier import QRCode_verifier as QR
+    # QR(c.certificate, USER.private_key.certificate).display_qrcode()
+    # QR(c.certificate, USER.private_key.certificate).verify_qrcode()
+
+    USER.revoke_certificate()
 
     if USER.logout():
         print("Logged out.")

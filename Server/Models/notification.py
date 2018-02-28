@@ -31,13 +31,24 @@ class Notification(db.Model):
             notif = cls.query.filter_by(user=user).all()
         if len(notif) < 1:
             return None
-        result = {'username': notif[0].user.username}
-        i = 0
-        for n in notif:
-            result.update(n.json(i))
-            i+=1
-        return result
+        return notif
 
     @classmethod
     def add(cls, data, user_id):
         Notification(data, user_id).save_to_db()
+
+    @classmethod
+    def delete(cls, user=None, user_id=None, id=None, data=None):
+        N = None
+        if user:
+            N = cls.get_all_by_user(user=user)
+        elif user_id:
+            N = cls.get_all_by_user(user_id=user_id)
+        if not N:
+            return
+        if id:
+            N = filter(lambda x: x.id == id, N)
+        elif data:
+            N = filter(lambda x: x.data == data, N)
+        for n in N:
+            n.delete_from_db()

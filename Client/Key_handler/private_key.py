@@ -5,6 +5,7 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 from Configuration.settings import PRIVATE_KEY_PASS
+from Key_handler.certificate import CA_key
 from os import remove
 
 class PrivateKey(object): #inherit from RSA key?
@@ -60,12 +61,19 @@ class PrivateKey(object): #inherit from RSA key?
         with open("Configuration/myCertificate.pem", "wb") as f:
             f.write(certificate)
 
-    def revoke(self):
-        remove("Configuration/myCertificate.pem")
-        remove("Configuration/myPrivateKey.pem")
-        self.key = None
-        self.certificate = None
-        return True
+    def revoke(self, resp):
+        rev = x509.load_pem_x509_crl(bytes(resp.json()['revocation_list'], 'utf-8'), default_backend())
+        if rev.is_signature_valid(CA_key):
+            for r in rev:
+                if r.serial_number == self.certificate.serial_number:
+                    remove("Configuration/myCertificate.pem")
+                    remove("Configuration/myPrivateKey.pem")
+                    self.key = None
+                    self.certificate = None
+                    print("Your certificate has been revoked succesfully.")
+                    return True
+        print("Signature check failed for the revocation list of user "+username+"! Make sure you have the right CA (root) certificate. Otherwise there might be a Man in the middle attack or the CA might be misbehaving!")
+        return False
 
     # Generate a CSR, write it to file and return it
     def createCSR(self, username):

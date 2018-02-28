@@ -1,4 +1,4 @@
-from flask import Flask, session, escape, redirect, url_for
+from flask import Flask, session, escape#, redirect, url_for
 from flask_restful import Api
 from flask_security import login_required
 from security import user_datastore, getSecurity
@@ -36,19 +36,21 @@ def index():
     except:
         return "Not logged in.", 401
 
-@app.route('/redir-test')
-def hello():
-    return redirect(url_for('foo'))
-
-@app.route('/foo')
-def foo():
-    return 'Hello Foo!'
+# @app.route('/redir-test')
+# def hello():
+#     return redirect(url_for('foo'))
+#
+# @app.route('/foo')
+# def foo():
+#     return 'Hello Foo!'
 
 #Api Resources
 api.add_resource(Certificate, '/certificate/<string:username>')
 api.add_resource(RevocationList, '/revocation_list/<string:username>')
 api.add_resource(Notification, '/notification/<string:username>')
-#api.add_resource(SMP, '/smp/<string:initiator>_<string:replier>/<string:step>')
+api.add_resource(SMP, '/smp/<string:initiator>_<string:replier>/<string:step>')
+#api.add_resource(Data, '/data/<string:username>')
+
 
 if __name__ == '__main__':
     from db import db

@@ -12,6 +12,8 @@ class User(db.Model, UserMixin):
     roles = db.relationship('Role', secondary=roles_users, backref=db.backref('users', lazy='dynamic'))
     certificates = db.relationship('Certificate', back_populates="user")
     notifications = db.relationship('Notification', back_populates="user")
+    #smp_initiator = db.relationship('SMP', back_populates="initiator")
+    #smp_replier = db.relationship('SMP', back_populates="replier")
 
     def get_security_payload(self):
         return {
