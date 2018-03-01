@@ -9,7 +9,7 @@ class ExtendedRegisterForm(RegisterForm):
     username = StringField('Username', [validators.Required()])
 
     def validate_username(form, field):
-        if ':' in field.data or '_' in field.dat:
+        if ':' in field.data or '_' in field.data:
             raise ValidationError("Username must not contain ':' or '_'")
 
 class ExtendedLoginForm(LoginForm):

@@ -74,4 +74,6 @@ class SMP(db.Model):
             return False
         self.next_step = step+1
         db.session.commit()
-        return self.json().update(self.get_data_as_json(step))
+        answer = self.json()
+        answer.update(self.get_data_as_json(step))
+        return answer

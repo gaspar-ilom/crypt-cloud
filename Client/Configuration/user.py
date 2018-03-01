@@ -91,7 +91,6 @@ class User(object):
         if response_post.text == "Logged in as {}.".format(self.username):
             self.save()
             return self.login()
-        print(response_post)
 
     def login(self):
         resource = '/login'

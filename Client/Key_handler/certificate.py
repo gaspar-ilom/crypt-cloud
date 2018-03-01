@@ -5,6 +5,7 @@ from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.exceptions import InvalidSignature
 from cryptography.x509.oid import NameOID
 from cryptography.hazmat.primitives import serialization
+from app import USER
 import os, datetime, pathlib
 
 pathlib.Path('Configuration/Certificates/').mkdir(parents=True, exist_ok=True)
@@ -69,7 +70,8 @@ class Certificate(object):
                     cert_list.update({line[0]:Certificate(v, cert)})
         except FileNotFoundError:
             pass
-        return cert_list
+        global certificate_list
+        certificate_list = cert_list
 
     #Note that certificate revocation lists are not securely implemented in the Cryptography library, as they are only based on the serial_number and not the fingerprint!
     def is_revoked(self):
@@ -95,7 +97,7 @@ class Certificate(object):
             assert(now > cert.not_valid_before and now < cert.not_valid_after)
             if username:
                 assert(cert.subject.get_attributes_for_oid(NameOID.COMMON_NAME)[0].value == username)
-            elif self.is_revoked():
+            if self.is_revoked():
                 return False
             CA_key.verify(
             cert.signature,
@@ -110,15 +112,26 @@ class Certificate(object):
              print("Signature check failed for the receive certificate of user "+username+"! Make sure you have the right CA (root) certificate. Otherwise there might be a Man in the middle attack!")
              return False
 
-    def verify(self):
-        if self.verified:
-            return True
-        resp = input('Do you want to verify {}`s certificate now? (Y/n)'.format(self.certificate.subject.get_attributes_for_oid(NameOID.COMMON_NAME)[0].value))
-        if resp == 'n':
-            return False
+    def verify(self, smp=None, qr=None):
+        if not smp and not qr:
+            if self.verified:
+                answer = input("Certificate is already verified. Verify again?(Y/n)")
+                if not answer = 'Y':
+                    return True
+            else:
+                resp = input('Do you want to verify {}`s certificate now? (Y/n)'.format(self.certificate.subject.get_attributes_for_oid(NameOID.COMMON_NAME)[0].value))
+                if resp == 'n':
+                    return False
         #TODO actual verification and making changes permanent!
-        self.verified = True
-        return True
+        if smp:
+            s = SMP(self.certificate, USER.private_key.certificate, initiator=False)
+            self.verified = s.verify()
+            return self.verified
+        if qr:
+            #TODO imlement qr stuff -> distinguish who is displayer!
+            pass
+        #TODO ask for verification method to be used and use it 
+        return False
 
     def confirm_using_unverified_certificate(self):
         share = input("Do you want to continue sharing with {} although the certificate is not verified? (Y/n)".format(self.certificate.subject.get_attributes_for_oid(NameOID.COMMON_NAME)[0].value))
@@ -128,10 +141,38 @@ class Certificate(object):
         return False
 
     @classmethod
+    def get_for_share(cls, username):
+        c = cls.get(username)
+        if not c:
+            return None
+        if not c.verify():
+            if not c.confirm_using_unverified_certificate():
+                return None
+        else:
+            #write to list if verified
+            #TODO move this to verify() method!
+            with open("Configuration/certificate_list", "r") as input:
+                with open("Configuration/new_certificate_list","w") as output:
+                    for line in input:
+                        split = line[:-1].split(':')
+                        if not split[0] == username:
+                            output.write(line)
+                        else:
+                            output.write("{}:{}:{}\n".format(
+                            split[0],
+                            c.verified,
+                            split[2]))
+            os.rename("Configuration/new_certificate_list", "Configuration/certificate_list")
+            cls.load_list()
+            return c
+
+
+    @classmethod
     def get(cls, username):
         try:
             c = certificate_list[username]
             if not c.is_valid():
+                #Delete stored invalid certificate, then try to retrieve a valid one
                 print("The invalid certificate of {} will be deleted.".format(username))
                 certificate_list.pop(username, None)
                 os.remove("Configuration/Certificates/"+username+".pem")
@@ -143,31 +184,13 @@ class Certificate(object):
                                 output.write(line)
                 os.rename("Configuration/new_certificate_list", "Configuration/certificate_list")
             else:
-                if not c.verify():
-                    if not c.confirm_using_unverified_certificate():
-                        return None
-                else:
-                    #write to list if verified
-                    with open("Configuration/certificate_list", "r") as input:
-                        with open("Configuration/new_certificate_list","w") as output:
-                            for line in input:
-                                split = line[:-1].split(':')
-                                if not split[0] == username:
-                                    output.write(line)
-                                else:
-                                    output.write("{}:{}:{}\n".format(
-                                    split[0],
-                                    c.verified,
-                                    split[2]))
-                    os.rename("Configuration/new_certificate_list", "Configuration/certificate_list")
                 return c
         except KeyError:
             pass
         print("Trying to retrieve a new certificate for the user {}.".format(username))
         c = cls.retrieve(username)
-        if c:
-            c.verify()
-            #save cert to disk!
+        if c and c.is_valid():
+            #Save certificate to disk
             with open("Configuration/Certificates/"+username+".pem", "wb") as f:
                 f.write(c.certificate.public_bytes(serialization.Encoding.PEM))
             with open("Configuration/certificate_list", "a") as f:
@@ -175,11 +198,12 @@ class Certificate(object):
                 username,
                 c.verified,
                 c.certificate.fingerprint(c.certificate.signature_hash_algorithm).hex()))
-            if not c.verified and not c.confirm_using_unverified_certificate():
-                return None
+            cls.load_list()
+            return c
         else:
-            print("No valid certificate for user {} could be retrieved from the server. Sharing is currently not possible.".format(username))
-        return c
+            print("No valid certificate for user {} could be retrieved from the server. Sharing and verification are currently not possible.".format(username))
+            return None
 
 CA_key = get_CA_key()
-certificate_list = Certificate.load_list()
+certificate_list = {}
+Certificate.load_list()

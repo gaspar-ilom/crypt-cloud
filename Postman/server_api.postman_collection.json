@@ -1,30 +1,21 @@
 {
+	"variables": [],
 	"info": {
 		"name": "server_api",
-		"_postman_id": "ae67321a-6a9b-c454-1c4a-90a0faad25bf",
+		"_postman_id": "830c013f-26ff-7e3d-2f1c-0ee2457d2170",
 		"description": "",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
 	},
 	"item": [
 		{
 			"name": "http://127.0.0.1:5000/",
 			"request": {
+				"url": "http://127.0.0.1:5000/",
 				"method": "GET",
 				"header": [],
-				"body": {},
-				"url": {
-					"raw": "http://127.0.0.1:5000/",
-					"protocol": "http",
-					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
-					],
-					"port": "5000",
-					"path": [
-						""
-					]
+				"body": {
+					"mode": "raw",
+					"raw": ""
 				},
 				"description": ""
 			},
@@ -33,22 +24,12 @@
 		{
 			"name": "http://127.0.0.1:5000/login",
 			"request": {
+				"url": "http://127.0.0.1:5000/login",
 				"method": "GET",
 				"header": [],
-				"body": {},
-				"url": {
-					"raw": "http://127.0.0.1:5000/login",
-					"protocol": "http",
-					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
-					],
-					"port": "5000",
-					"path": [
-						"login"
-					]
+				"body": {
+					"mode": "raw",
+					"raw": ""
 				},
 				"description": ""
 			},
@@ -57,6 +38,7 @@
 		{
 			"name": "http://127.0.0.1:5000/login",
 			"request": {
+				"url": "http://127.0.0.1:5000/login",
 				"method": "POST",
 				"header": [
 					{
@@ -68,20 +50,6 @@
 					"mode": "raw",
 					"raw": "{\n    \"csrf_token\": \"IjIzYTk0Y2Y0Y2M0OTlkMTc4OWRiM2VjNzcxZmQwNjlkN2QxNDg0ZDEi.DU4EqQ.wRBOLkhe2KbB4QAsNKNK0f6SbTE\",\n    \"email\": \"admin\",\n    \"password\": \"test123\",\n    \"remember\": \"y\"\n}"
 				},
-				"url": {
-					"raw": "http://127.0.0.1:5000/login",
-					"protocol": "http",
-					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
-					],
-					"port": "5000",
-					"path": [
-						"login"
-					]
-				},
 				"description": ""
 			},
 			"response": []
@@ -89,6 +57,7 @@
 		{
 			"name": "http://127.0.0.1:5000/certificate/admin",
 			"request": {
+				"url": "http://127.0.0.1:5000/certificate/admin",
 				"method": "POST",
 				"header": [
 					{
@@ -100,21 +69,6 @@
 					"mode": "raw",
 					"raw": "{\n    \"csr\": \"-----BEGIN CERTIFICATE REQUEST-----\\nMIIEfTCCAmUCAQAwJzEOMAwGA1UEAwwFYWRtaW4xFTATBgoJkiaJk/IsZAEBDAVh\\nZG1pbjCCAiIwDQYJKoZIhvcNAQEBBQADggIPADCCAgoCggIBALzITw7OWcVoNW+f\\nSUENx46Scs+q2H3t5qxzucOQ5LA6eU3E/TstyfwKcxnc2zeINZB2lV5Rl7WHz1o0\\nImnRFCreRYgSKjrvZm4+Qdx3171iaIAswGxdLvaHlfR8aKSFqJCI7sM1EjwhNetY\\nX5z0F9gTzeqoTUjUnM63SW0sOabJxJeeY1HNY51+Ptnu+R0uEd2iGwwoVaZ0zSKY\\nezeRU9i8pImBEOrZ2XhU+ODKqax0fOzFLFK9jjIn15Pp0YjPMWWItQSJJmaM8CD0\\nTRB97TDMVfsSN0q0HjCMXgyg7j2Fs7+pnVxZ3RP4KNjpvE/8DB0NHrj6+uzMYpSK\\nwNYpqQRGwKn9xbD06u3OfV8r6q51ELSdqTRZvCC0hmHnEaVHM+4FPfLUj3+Yu/Yb\\nkYxPgeCsL/x4Xg94kNS4BlRgPO66tfKiKqL+o9e1tmRCw3bd9qVET99JU4vtw06I\\n4/VuslX2iOeFJOKu4ouCmT+D4/feuFeZBh51AmJh4It3zAY7WbM0U/y843/wjdB1\\nb12aUpk8hebchCA87b4ZVoPQCxKCLFZU7tmPuLgX0QOWIiHsdFLJ8UmdeVA8bCyG\\nGtyGkhY3BRJwt33NGb/3srnxroJqa94Kl28o492wN+O4lk3pNG/WQWjVWKQbfOhM\\nTSngZWRjjQ1UvjCtib37TuPdre2XAgMBAAGgETAPBgkqhkiG9w0BCQ4xAjAAMA0G\\nCSqGSIb3DQEBDQUAA4ICAQAjdn6jpsuQEndI9lZhYzQaRSp33KHIE/aivLOxe309\\nCFW4JPxEvxoK/xSJORX48m52fBj6SelNNaI5xxMYtEzAHskUbOvxENm/Aa5H2ZBt\\nJ1O5GVr3/DtaZcMjugdA3+MPMNww3Q064GrzUDLW2NgIC3YfQqshNjCtUSwEvHpX\\n3rtn0Mt0Bd/UuV7N4aKRhPt0Os7QuFjystvRnFlaKZ0ln8P7R5wb8pQ42wmg58aH\\nG+7mmzjbsBqH8bxEG5Vvx4GdXax6xhpWR9p7j+5rpOr3d0c2uWqEvoypPnhgp3Gn\\nnV/i/qj2P8z52AZJJ8EC/Up88nmnMtJlDymEgkSgjJbCnfviM2dWFjPG2pTuOqaD\\ng4y0ZsRk0v2BZHz07bcl95z8O01NENJqQGtW9CpnDK4rg6IKBGmPLWKyn+GxFMHa\\nYCc6KFguHPXy81J0VWWbDO9Hxvy7qgfu1V54fcJKu3nFnB39jCwsd3E/+xsqhrD9\\nBFitIXxsr5NiTU2WKCAehta6oqKSroUg3nVTTO2jrErNKE89+40L9q2dfu3gZb35\\nX35HWxSbFJG11RL587Cigv2V7XDmFyClu//AXGccy2tNSTTvjwGG6mLgsAJA5dTr\\nBUNEe+3wieRhbYsgadXgXGCBYQFapB1TX8THnSlRAKg5/1ytvvFMEpy1rAz1LnUU\\noA==\\n-----END CERTIFICATE REQUEST-----\\n\"\n}"
 				},
-				"url": {
-					"raw": "http://127.0.0.1:5000/certificate/admin",
-					"protocol": "http",
-					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
-					],
-					"port": "5000",
-					"path": [
-						"certificate",
-						"admin"
-					]
-				},
 				"description": ""
 			},
 			"response": []
@@ -122,51 +76,18 @@
 		{
 			"name": "http://127.0.0.1:5000/certificate/admin",
 			"request": {
-				"method": "GET",
-				"header": [],
+				"url": "http://127.0.0.1:5000/smp/admin_tester/question",
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
 				"body": {
-					"mode": "formdata",
-					"formdata": [
-						{
-							"key": "csrf_token",
-							"value": "IjIzYTk0Y2Y0Y2M0OTlkMTc4OWRiM2VjNzcxZmQwNjlkN2QxNDg0ZDEi.DUaA7w.9Xs-8aMGpJY5gjVNiiTT4eMDVio",
-							"description": "",
-							"type": "text"
-						},
-						{
-							"key": "email",
-							"value": "admin",
-							"description": "",
-							"type": "text"
-						},
-						{
-							"key": "password",
-							"value": "test123",
-							"description": "",
-							"type": "text"
-						},
-						{
-							"key": "remember",
-							"value": "y",
-							"description": "",
-							"type": "text"
-						}
-					]
-				},
-				"url": {
-					"raw": "http://127.0.0.1:5000/certificate/admin",
-					"protocol": "http",
-					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
-					],
-					"port": "5000",
-					"path": [
-						"certificate",
-						"admin"
-					]
+					"mode": "raw",
+					"raw": "{\n    \"question\": \"This ist working?\"\n}"
 				},
 				"description": ""
 			},
@@ -175,6 +96,7 @@
 		{
 			"name": "http://127.0.0.1:5000/revocation_list/admin",
 			"request": {
+				"url": "http://127.0.0.1:5000/revocation_list/admin",
 				"method": "GET",
 				"header": [],
 				"body": {
@@ -206,21 +128,6 @@
 						}
 					]
 				},
-				"url": {
-					"raw": "http://127.0.0.1:5000/revocation_list/admin",
-					"protocol": "http",
-					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
-					],
-					"port": "5000",
-					"path": [
-						"revocation_list",
-						"admin"
-					]
-				},
 				"description": ""
 			},
 			"response": []
@@ -228,51 +135,12 @@
 		{
 			"name": "http://127.0.0.1:5000/certificate/admin",
 			"request": {
+				"url": "http://127.0.0.1:5000/certificate/admin",
 				"method": "DELETE",
 				"header": [],
 				"body": {
-					"mode": "formdata",
-					"formdata": [
-						{
-							"key": "csrf_token",
-							"value": "IjIzYTk0Y2Y0Y2M0OTlkMTc4OWRiM2VjNzcxZmQwNjlkN2QxNDg0ZDEi.DUaA7w.9Xs-8aMGpJY5gjVNiiTT4eMDVio",
-							"description": "",
-							"type": "text"
-						},
-						{
-							"key": "email",
-							"value": "admin",
-							"description": "",
-							"type": "text"
-						},
-						{
-							"key": "password",
-							"value": "test123",
-							"description": "",
-							"type": "text"
-						},
-						{
-							"key": "remember",
-							"value": "y",
-							"description": "",
-							"type": "text"
-						}
-					]
-				},
-				"url": {
-					"raw": "http://127.0.0.1:5000/certificate/admin",
-					"protocol": "http",
-					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
-					],
-					"port": "5000",
-					"path": [
-						"certificate",
-						"admin"
-					]
+					"mode": "raw",
+					"raw": ""
 				},
 				"description": ""
 			},
@@ -281,6 +149,7 @@
 		{
 			"name": "http://127.0.0.1:5000/certificate/admin",
 			"request": {
+				"url": "http://127.0.0.1:5000/certificate/admin",
 				"method": "DELETE",
 				"header": [
 					{
@@ -292,21 +161,6 @@
 					"mode": "raw",
 					"raw": "{\n    \"cert_serial\": 338795427139235645311692568631646048517937883501\n}"
 				},
-				"url": {
-					"raw": "http://127.0.0.1:5000/certificate/admin",
-					"protocol": "http",
-					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
-					],
-					"port": "5000",
-					"path": [
-						"certificate",
-						"admin"
-					]
-				},
 				"description": "delete just one certificate"
 			},
 			"response": []
@@ -314,6 +168,7 @@
 		{
 			"name": "http://127.0.0.1:5000/logout",
 			"request": {
+				"url": "http://127.0.0.1:5000/logout",
 				"method": "GET",
 				"header": [],
 				"body": {
@@ -345,20 +200,6 @@
 						}
 					]
 				},
-				"url": {
-					"raw": "http://127.0.0.1:5000/logout",
-					"protocol": "http",
-					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
-					],
-					"port": "5000",
-					"path": [
-						"logout"
-					]
-				},
 				"description": ""
 			},
 			"response": []
@@ -366,6 +207,7 @@
 		{
 			"name": "http://127.0.0.1:5000/register",
 			"request": {
+				"url": "http://127.0.0.1:5000/register",
 				"method": "POST",
 				"header": [],
 				"body": {
@@ -403,20 +245,6 @@
 						}
 					]
 				},
-				"url": {
-					"raw": "http://127.0.0.1:5000/register",
-					"protocol": "http",
-					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
-					],
-					"port": "5000",
-					"path": [
-						"register"
-					]
-				},
 				"description": ""
 			},
 			"response": []
@@ -424,6 +252,7 @@
 		{
 			"name": "http://127.0.0.1:5000/register",
 			"request": {
+				"url": "http://127.0.0.1:5000/register",
 				"method": "GET",
 				"header": [],
 				"body": {
@@ -455,20 +284,6 @@
 						}
 					]
 				},
-				"url": {
-					"raw": "http://127.0.0.1:5000/register",
-					"protocol": "http",
-					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
-					],
-					"port": "5000",
-					"path": [
-						"register"
-					]
-				},
 				"description": ""
 			},
 			"response": []
@@ -476,6 +291,7 @@
 		{
 			"name": "http://127.0.0.1:5000/register",
 			"request": {
+				"url": "http://127.0.0.1:5000/register",
 				"method": "POST",
 				"header": [
 					{
@@ -487,19 +303,165 @@
 					"mode": "raw",
 					"raw": "{\n\t\"remember\": \"y\",\n\t\"csrf_token\": \"IjIzYTk0Y2Y0Y2M0OTlkMTc4OWRiM2VjNzcxZmQwNjlkN2QxNDg0ZDEi.DU4Wbw.hidoaJmY1fRoVayPeug3MFxxubI\",\n\t\"password_confirm\": \"test123\",\n\t\"email\": \"bla@wurst.de\",\n\t\"username\": \"bla\",\n\t\"password\": \"test123\"\n\t\n}"
 				},
-				"url": {
-					"raw": "http://127.0.0.1:5000/register",
-					"protocol": "http",
-					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
-					],
-					"port": "5000",
-					"path": [
-						"register"
-					]
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "http://127.0.0.1:5000/notification/admin",
+			"request": {
+				"url": "http://127.0.0.1:5000/notification/admin",
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"question\": \"This ist working?\"\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "http://127.0.0.1:5000/notification/admin",
+			"request": {
+				"url": "http://127.0.0.1:5000/notification/admin",
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"question\": \"This ist working?\"\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "http://127.0.0.1:5000/smp/admin_tester/question",
+			"request": {
+				"url": "http://127.0.0.1:5000/smp/admin_tester/question",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"question\": \"This ist working?\"\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "http://127.0.0.1:5000/smp/admin_tester/question",
+			"request": {
+				"url": "http://127.0.0.1:5000/smp/admin_tester/question",
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"question\": \"This ist working?\"\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "http://127.0.0.1:5000/smp/admin_tester/question",
+			"request": {
+				"url": "http://127.0.0.1:5000/smp/admin_tester/question",
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"question\": \"This ist working?\"\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "http://127.0.0.1:5000/smp/admin_tester/step1",
+			"request": {
+				"url": "http://127.0.0.1:5000/smp/admin_tester/step1",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"question\": \"This ist working?\"\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "http://127.0.0.1:5000/smp/admin_tester/step1",
+			"request": {
+				"url": "http://127.0.0.1:5000/smp/admin_tester/step1",
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"question\": \"This ist working?\"\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "http://127.0.0.1:5000/smp/admin_tester/step1",
+			"request": {
+				"url": "http://127.0.0.1:5000/smp/admin_tester/step1",
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"question\": \"This ist working?\"\n}"
 				},
 				"description": ""
 			},

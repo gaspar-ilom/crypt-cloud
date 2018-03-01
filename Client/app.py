@@ -20,7 +20,7 @@ while not USER:
     if USER.register():
         USER.set_private_key()
     else:
-        print("\nUsername or email is already taken. Please choose another username and/or email.")
+        print("\nUsername or email is already taken, is too short or not valid. Please choose another username and/or email.")
         USER = None
 if USER.login():
     print("Logged in as {}.\n".format(USER.username))
@@ -56,7 +56,16 @@ if __name__ == '__main__':
     # QR(c.certificate, USER.private_key.certificate).display_qrcode()
     # QR(c.certificate, USER.private_key.certificate).verify_qrcode()
 
-    USER.revoke_certificate()
+    u = input("Get cert of (username): ")
+    init = input("Init? (y/n): ")
+    c = certificate.Certificate.get(u)
+    from Verifier.SMP_verifier import SMP_verifier as SMP
+    if init == 'y':
+        s = SMP(USER.private_key.certificate, c.certificate)
+    else:
+        s = SMP(c.certificate, USER.private_key.certificate, initiator=False)
+    s.verify()
+
 
     if USER.logout():
         print("Logged out.")

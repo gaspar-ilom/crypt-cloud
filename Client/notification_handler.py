@@ -1,4 +1,5 @@
 from connection import CONN
+from Key_handler.certificate import Certificate
 import time, threading, json
 
 class Notifications(object):
@@ -11,7 +12,7 @@ class Notifications(object):
         self.threads.append(threading.Thread(target=self.loop, daemon=True))
 
     def start(self):
-        if not self.check:
+        if not self.threads[0].is_alive():
             self.threads[0].start()
 
     def retrieve(self):
@@ -33,8 +34,10 @@ class Notifications(object):
     def handle(self):
         for n in self.list:
             if n.startswith('/smp/'):
-                #TODO call SMP and handle it
                 print("SMP request retrieved: {}".format(n))
+                user = n.split('/')[2].split('_')[0]
+                #catch errors?!
+                c = Certificate.get(user).verify(smp=n)
             elif n.startswith('/data/'):
                 #TODO implement handle new data shared by someone
                 print("New Data shared. Retrieve by requesting: {}".format(n))
@@ -44,7 +47,7 @@ class Notifications(object):
 
     def delete(self, notification):
         data = {"data": notification}
-        resp = CONN.delete('/notification/'+self.username, data=data)
+        CONN.delete('/notification/'+self.username, data=data)
         self.list.remove(notification)
 
     def loop(self):

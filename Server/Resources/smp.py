@@ -38,7 +38,6 @@ class SMP(Resource):
                 answer.update(data)
                 return answer
 
-
     @login_required
     def post(self, initiator, replier, step):
         valid = self.validate_request(initiator, replier, step, 'post')
@@ -63,7 +62,7 @@ class SMP(Resource):
                 answer = smp_object.update(i, data)
                 if not answer:
                     return {'message': "The requested step resource does not exist in SMP or is not allowed to be modified at this phase of the protocol."}, 404
-                return answer.json()
+                return answer
         return {'message': "Illegal request."}, 404
 
     @login_required
@@ -77,7 +76,7 @@ class SMP(Resource):
         if del_smp:
             del_smp.delete_from_db()
         Notification.delete(user=rep, data="/smp/{}_{}/question".format(initiator, replier))
-        return {'message': "Succesfully deleted remaining SMP data for {} and {}".format(initiator, replier)}, 404
+        return {'message': "Succesfully deleted remaining SMP data for {} and {}".format(initiator, replier)}
 
     def validate_request(self, initiator, replier, step, method):
         if not step in self.steps:

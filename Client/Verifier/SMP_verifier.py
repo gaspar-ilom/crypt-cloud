@@ -12,11 +12,13 @@
 
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.backends import default_backend
-import os, struct, binascii
+from cryptography.x509.oid import NameOID
+from connection import CONN
+import os, struct, binascii, datetime, time, base64
 
 class SMP(object):
 
-    def __init__(self, initiator_certificate=None, replier_certificate=None, shared_secret=None):
+    def __init__(self, initiator_certificate, replier_certificate, shared_secret):
         #modulus and generator are hardcoded
         self.mod = 2410312426921032588552076022197566074856950548502459942654116941958108831682612228890093858261341614673227141477904012196503648957050582631942730706805009223062734745341073406696246014589361659774041027169249453200378729434170325843778659198143763193776859869524088940195577346119843545301547043747207749969763750084308926339295559968882457872412993810129130294592999947926365264059284647209730384947211681434464714438488520940127459844288859336526896320919633919
         self.modOrder = (self.mod-1) // 2
@@ -27,8 +29,7 @@ class SMP(object):
             shared_secret = int(binascii.hexlify(bytes(shared_secret, 'utf-8')), 16)
         elif not type(shared_secret) is int:
             raise TypeError("Secret must be an int or a string. Got type: " + str(type(shared_secret)))
-        #self.secret = sha256(initiator_certificate.fingerprint(hashes.SHA256())+replier_certificate.fingerprint(hashes.SHA256())+shared_secret)
-        self.secret =shared_secret
+        self.secret = sha256(initiator_certificate.fingerprint(hashes.SHA256())+replier_certificate.fingerprint(hashes.SHA256())+longToBytes(shared_secret))
 
     def step1(self):
         self.x2 = createRandomExponent()
@@ -296,10 +297,132 @@ def createRandomExponent():
     return int(binascii.hexlify(os.urandom(192)),16)
 
 def sha256(message):
+    if type(message) is str:
+        message = bytes(message,'utf-8')
+    elif not type(message) is bytes:
+        raise TypeError("Hash message must be a string or bytes string. Got type: " + str(type(message)))
     hasher = hashes.Hash(hashes.SHA256(), default_backend())
-    hasher.update(bytes(message,'utf-8'))
+    hasher.update(message)
     return int(binascii.hexlify(hasher.finalize()), 16)
-    #return int(hashlib.sha256(bytes(message, 'utf-8')).hexdigest(), 16)
 
 
-class SMP_Verifier(object):
+class SMP_verifier(object):
+    shared_secret = None
+    question = None
+    steps = ['question','step1', 'step2','step3','step4']
+    step = 0
+    smp = None
+
+    def __init__(self, initiator_certificate, replier_certificate, initiator=True):
+        self.initiator_certificate = initiator_certificate
+        self.replier_certificate = replier_certificate
+        self.resource = "/smp/{}_{}/".format(
+        initiator_certificate.subject.get_attributes_for_oid(NameOID.COMMON_NAME)[0].value,
+        replier_certificate.subject.get_attributes_for_oid(NameOID.COMMON_NAME)[0].value)
+        self.initiator = initiator
+        self.start_time = datetime.datetime.utcnow()
+        if initiator:
+            self.initiate()
+        else:
+            self.reply()
+
+    def initiate(self):
+        self.clear()
+        self.question = input("Provide a question only your counterpart can answer: ")
+        self.shared_secret = input("Provide the answer to that question, i.e. the secret you share with your counterpart: ")
+        resp = CONN.post(self.resource+self.steps[self.step], data={"question": self.question})
+        if not resp.status_code == 200:
+            print(resp.json())
+        self.step +=1
+        self.smp = SMP(self.initiator_certificate, self.replier_certificate, self.shared_secret)
+        #self.verify()
+
+    def reply(self):
+        #request Question
+        resp = CONN.get(self.resource+self.steps[self.step])
+        if not resp.status_code == 200:
+            print(resp.json())
+        self.question = resp.json()['question']
+        self.display()
+        #provide answer
+        self.shared_secret = input("Provide the answer to that question, i.e. the secret you share with your counterpart: ")
+        self.step += 1
+        self.smp = SMP(self.initiator_certificate, self.replier_certificate, self.shared_secret)
+        # self.verify()
+
+    def verify(self):
+        if self.initiator:
+            # Do the SMP protocol
+            buffer = self.receive()
+            while not buffer:
+                time.sleep(0.1)
+                buffer = self.receive()
+            buffer = self.smp.step2(buffer)
+            self.send(buffer)
+            buffer = self.receive()
+            while not buffer:
+                time.sleep(0.1)
+                buffer = self.receive()
+            buffer = self.smp.step4(buffer)
+            self.send(buffer)
+        else:
+            # Do the SMP protocol
+            buffer = self.smp.step1()
+            #print ("buffer = {}\n".format(  buffer ))
+            self.send(buffer)
+            buffer = self.receive()
+            while not buffer:
+                time.sleep(0.1)
+                buffer = self.receive()
+            buffer = self.smp.step3(buffer)
+            self.send(buffer)
+            buffer = self.receive()
+            while not buffer:
+                time.sleep(0.1)
+                buffer = self.receive()
+            self.smp.step5(buffer)
+        # Check if the secrets match
+        if self.smp.match:
+            print ("Secrets match.")
+        else:
+            print ("Secrets do not match.")
+        #Cleanup and return True only if protocol terminated within the required time limit = 5 min
+        self.clear()
+        if self.time_check():
+            print("SMP took too long. Not accepting verification.")
+            return False
+        return self.smp.match
+
+    def send(self, buffer):
+        CONN.post(self.resource+self.steps[self.step], data={'data': base64.b64encode(buffer)})
+        self.step += 1
+
+    def time_check(self):
+        return self.start_time + datetime.timedelta(minutes=1) < datetime.datetime.utcnow()
+
+    def receive(self):
+        resp = CONN.get(self.resource+self.steps[self.step])
+        buffer = None
+        try:
+            buffer = resp.json()['data']
+        except KeyError:
+            return None
+        if buffer:
+            self.step += 1
+            return base64.b64decode(buffer)
+        return None
+
+    def clear(self):
+        resource = self.resource
+        if self.initiator:
+            resource += self.steps[0]
+        else:
+            resource += self.steps[1]
+        CONN.delete(resource)
+        self.shared_secret = None
+        self.question = None
+
+    def display(self):
+        print("Question: {}".format(self.question))
+        if self.shared_secret:
+            print("Provided answer: ".format(self.shared_secret))
