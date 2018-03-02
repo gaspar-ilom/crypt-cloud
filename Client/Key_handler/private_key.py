@@ -5,7 +5,7 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 from Configuration.settings import PRIVATE_KEY_PASS
-from Key_handler.certificate import CA_key
+from Configuration.settings import CA_KEY
 from os import remove
 
 class PrivateKey(object): #inherit from RSA key?
@@ -63,7 +63,7 @@ class PrivateKey(object): #inherit from RSA key?
 
     def revoke(self, resp):
         rev = x509.load_pem_x509_crl(bytes(resp.json()['revocation_list'], 'utf-8'), default_backend())
-        if rev.is_signature_valid(CA_key):
+        if rev.is_signature_valid(CA_KEY):
             for r in rev:
                 if r.serial_number == self.certificate.serial_number:
                     remove("Configuration/myCertificate.pem")

@@ -1,31 +1,11 @@
-from Configuration.user import User
-from getpass import getpass
 from connection import CONN
-from Key_handler import certificate, private_key
-
-print("Starting client...")
-USER = User.load()
-while not USER:
-    username = input('Register new Account\nUsername: ')
-    email = input('Email: ')
-    password = getpass()
-    password_confirm = getpass('Retype Password: ')
-    if len(password) < 6:
-        print("Password must have at least 6 characters.")
-        continue
-    if not password == password_confirm:
-        print("Passwords do not match.")
-        continue
-    USER = User(username, email, password)
-    if USER.register():
-        USER.set_private_key()
-    else:
-        print("\nUsername or email is already taken, is too short or not valid. Please choose another username and/or email.")
-        USER = None
-if USER.login():
-    print("Logged in as {}.\n".format(USER.username))
+from Configuration.user import USER
+from notification_handler import Notifications
+import easygui as gui
 
 if __name__ == '__main__':
+    handler = Notifications(USER.username)
+    handler.start()
     while 1:
         cmd = input('Input command (ex. help): ')
         cmd = cmd.split()
@@ -51,22 +31,12 @@ if __name__ == '__main__':
         else:
             print("Invalid command. Type 'help' for a list of commands.\n")
 
-    # c = certificate.Certificate.get('admin')
-    # from Verifier.QRCode_verifier import QRCode_verifier as QR
-    # QR(c.certificate, USER.private_key.certificate).display_qrcode()
-    # QR(c.certificate, USER.private_key.certificate).verify_qrcode()
+    from Key_handler import certificate
+    u = gui.multenterbox("Get certificate of: ",'cert', ['Username', 'Init'])
+    c = certificate.Certificate.get(u[0], True)
+    c.verify()
 
-    u = input("Get cert of (username): ")
-    init = input("Init? (y/n): ")
-    c = certificate.Certificate.get(u)
-    from Verifier.SMP_verifier import SMP_verifier as SMP
-    if init == 'y':
-        s = SMP(USER.private_key.certificate, c.certificate)
-    else:
-        s = SMP(c.certificate, USER.private_key.certificate, initiator=False)
-    s.verify()
-
-
+    handler.stop()
     if USER.logout():
         print("Logged out.")
     else:

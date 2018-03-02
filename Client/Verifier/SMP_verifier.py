@@ -15,6 +15,7 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.x509.oid import NameOID
 from connection import CONN
 import os, struct, binascii, datetime, time, base64
+import easygui as gui
 
 class SMP(object):
 
@@ -312,6 +313,7 @@ class SMP_verifier(object):
     steps = ['question','step1', 'step2','step3','step4']
     step = 0
     smp = None
+    initiated = False
 
     def __init__(self, initiator_certificate, replier_certificate, initiator=True):
         self.initiator_certificate = initiator_certificate
@@ -328,41 +330,50 @@ class SMP_verifier(object):
 
     def initiate(self):
         self.clear()
-        self.question = input("Provide a question only your counterpart can answer: ")
-        self.shared_secret = input("Provide the answer to that question, i.e. the secret you share with your counterpart: ")
+        self.question, self.shared_secret = gui.multenterbox("Provide a question only your counterpart knows the answer of:",'SMP: Question and Shared Secret', ['Question', 'Shared Secret'])
         resp = CONN.post(self.resource+self.steps[self.step], data={"question": self.question})
         if not resp.status_code == 200:
-            print(resp.json())
+            gui.msgbox("SMP verification initiation was not successful.\n{}".format(resp.json()), 'ERROR')
+            return
         self.step +=1
         self.smp = SMP(self.initiator_certificate, self.replier_certificate, self.shared_secret)
-        #self.verify()
+        self.initiated = True
 
     def reply(self):
         #request Question
         resp = CONN.get(self.resource+self.steps[self.step])
         if not resp.status_code == 200:
-            print(resp.json())
+            gui.msgbox("SMP verification reply was not successful.\n{}".format(resp.json()), 'ERROR')
+            self = None
+            return
         self.question = resp.json()['question']
-        self.display()
+        #self.display()
         #provide answer
-        self.shared_secret = input("Provide the answer to that question, i.e. the secret you share with your counterpart: ")
+        self.shared_secret = gui.enterbox("Provide the answer to the following question, i.e. the secret you share with your counterpart:\n{}".format(self.question),'Shared Secret')
         self.step += 1
         self.smp = SMP(self.initiator_certificate, self.replier_certificate, self.shared_secret)
-        # self.verify()
+        self.initiated = True
 
     def verify(self):
+        if not self.initiated:
+            self.clear()
+            return False
         if self.initiator:
             # Do the SMP protocol
             buffer = self.receive()
             while not buffer:
                 time.sleep(0.1)
                 buffer = self.receive()
+                if not self.time_check():
+                    return False
             buffer = self.smp.step2(buffer)
             self.send(buffer)
             buffer = self.receive()
             while not buffer:
                 time.sleep(0.1)
                 buffer = self.receive()
+                if not self.time_check():
+                    return False
             buffer = self.smp.step4(buffer)
             self.send(buffer)
         else:
@@ -374,23 +385,26 @@ class SMP_verifier(object):
             while not buffer:
                 time.sleep(0.1)
                 buffer = self.receive()
+                if not self.time_check():
+                    return False
             buffer = self.smp.step3(buffer)
             self.send(buffer)
             buffer = self.receive()
             while not buffer:
                 time.sleep(0.1)
                 buffer = self.receive()
+                if not self.time_check():
+                    return False
             self.smp.step5(buffer)
         # Check if the secrets match
         if self.smp.match:
-            print ("Secrets match.")
+            print("Secrets match.")
         else:
-            print ("Secrets do not match.")
+            print("Secrets do not match.")
         #Cleanup and return True only if protocol terminated within the required time limit = 5 min
-        self.clear()
-        if self.time_check():
-            print("SMP took too long. Not accepting verification.")
+        if not self.time_check():
             return False
+        self.clear()
         return self.smp.match
 
     def send(self, buffer):
@@ -398,7 +412,12 @@ class SMP_verifier(object):
         self.step += 1
 
     def time_check(self):
-        return self.start_time + datetime.timedelta(minutes=1) < datetime.datetime.utcnow()
+        passed = self.start_time + datetime.timedelta(minutes=1) > datetime.datetime.utcnow()
+        if passed:
+            return True
+        gui.msgbox("SMP took too long. Verification failed.", 'Info')
+        self.clear()
+        return False
 
     def receive(self):
         resp = CONN.get(self.resource+self.steps[self.step])
@@ -413,6 +432,7 @@ class SMP_verifier(object):
         return None
 
     def clear(self):
+        self.initiated = False
         resource = self.resource
         if self.initiator:
             resource += self.steps[0]
@@ -423,6 +443,6 @@ class SMP_verifier(object):
         self.question = None
 
     def display(self):
-        print("Question: {}".format(self.question))
+        gui.msgbox("Question: {}".format(self.question), 'SMP Question')
         if self.shared_secret:
             print("Provided answer: ".format(self.shared_secret))

@@ -1,6 +1,7 @@
 from connection import CONN
 from Key_handler.certificate import Certificate
 import time, threading, json
+import easygui as gui
 
 class Notifications(object):
     list = []
@@ -20,7 +21,8 @@ class Notifications(object):
         try:
             resp = CONN.get(resource)
         except:
-            print("Connection was refused. Make sure the specified server is reachable.")
+            gui.msgbox("Connection was refused. Make sure the specified server is reachable.", 'ERROR in Notification Handler Thread')
+            #print("Connection was refused. Make sure the specified server is reachable.")
             return
         if not resp.status_code == 200:
             return False
@@ -34,15 +36,19 @@ class Notifications(object):
     def handle(self):
         for n in self.list:
             if n.startswith('/smp/'):
-                print("SMP request retrieved: {}".format(n))
+                #print("SMP request retrieved: {}".format(n))
                 user = n.split('/')[2].split('_')[0]
+                verify = gui.ynbox("Retrieved SMP verification request from user {}. Accept and start verification now? (Y/n)".format(user), '[NOTIFICATION]', ('Yes', 'No'))
                 #catch errors?!
-                c = Certificate.get(user).verify(smp=n)
+                if verify:
+                    c = Certificate.get(user)
+                    if c:
+                        c.verify(smp=2)
             elif n.startswith('/data/'):
                 #TODO implement handle new data shared by someone
-                print("New Data shared. Retrieve by requesting: {}".format(n))
+                gui.msgbox("New Data shared. Retrieve by requesting: {}".format(n), '[NOTIFICATION]')
             else:
-                print("Unknown Notification. Handle Manually: {}".format(n))
+                gui.msgbox("Unknown Notification. Handle Manually: {}".format(n), '[NOTIFICATION]')
             self.delete(n)
 
     def delete(self, notification):

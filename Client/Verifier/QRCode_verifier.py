@@ -3,6 +3,7 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.backends import default_backend
 from PIL import Image
 import zbar, cv2, base64, binascii
+import easygui as gui
 
 class QRCode_verifier(object):
     combined_fingerprint = None
@@ -11,11 +12,11 @@ class QRCode_verifier(object):
         hasher = hashes.Hash(hashes.SHA256(), default_backend())
         hasher.update(displayer_certificate.fingerprint(hashes.SHA256())+reader_certificate.fingerprint(hashes.SHA256()))
         self.combined_fingerprint = hasher.finalize()
-        # print(self.combined_fingerprint)
 
     def display_qrcode(self):
         qr = make(base64.b64encode(self.combined_fingerprint))
         qr.show()
+        return gui.ynbox("Did the QR-Code Scan succeed?", 'Result of Scan', ('Yes', 'No'))
 
     def verify_qrcode(self):
         capture = cv2.VideoCapture(0)
@@ -38,8 +39,7 @@ class QRCode_verifier(object):
                             print("Fingerprint succesfully verified!")
                             return True
                     except binascii.Error:
-                        print("Could not read fingerprint. It is not base64 encoded. Data read from QRCode:")
-                        print(decoded.data)
+                        print("Could not read fingerprint. It is not base64 encoded. Data read from QRCode:\n{}".format(decoded.data))
                         return False
                     print("Fingerprints did not match. You are using different certificates. Update the certificates retrieved from PKI at both cliens. If the problem persists, it might indicate a Man-in-the-Middle Attack.")
                     return False

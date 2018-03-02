@@ -79,6 +79,8 @@ class SMP(Resource):
         return {'message': "Succesfully deleted remaining SMP data for {} and {}".format(initiator, replier)}
 
     def validate_request(self, initiator, replier, step, method):
+        if initiator == replier:
+            return {'message': "You may not use SMP to verify your own certificate."}, 400
         if not step in self.steps:
             return {'message': "Resource '{}' does not exist.".format(step)}, 404
         init = User.find_by_name(initiator)
