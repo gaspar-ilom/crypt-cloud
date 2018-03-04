@@ -1,6 +1,6 @@
 from db import db
 from flask_security import UserMixin
-from Models.roles_users import roles_users
+from Models.joins import roles_users
 
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
@@ -9,11 +9,22 @@ class User(db.Model, UserMixin):
     password = db.Column(db.String(255))
     active = db.Column(db.Boolean())
     confirmed_at = db.Column(db.DateTime())
+    private_key = db.Column(db.LargeBinary)
     roles = db.relationship('Role', secondary=roles_users, backref=db.backref('users', lazy='dynamic'))
+    #data = db.relationship('Data_Access', back_populates="user")
     certificates = db.relationship('Certificate', back_populates="user")
     notifications = db.relationship('Notification', back_populates="user")
-    #smp_initiator = db.relationship('SMP', back_populates="initiator")
-    #smp_replier = db.relationship('SMP', back_populates="replier")
+
+    def get_private_key(self):
+        return {'private_key': str(self.private_key, 'utf-8')}
+
+    def set_private_key(self, key):
+        self.private_key = bytes(key, 'utf-8')
+        db.session.commit()
+
+    def delete_private_key(self):
+        self.private_key = random_serial_number
+        db.session.commit()
 
     def get_security_payload(self):
         return {

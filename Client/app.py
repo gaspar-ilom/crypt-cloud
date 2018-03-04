@@ -7,6 +7,7 @@ if __name__ == '__main__':
     handler = Notifications(USER.username)
     handler.start()
     while 1:
+        break
         cmd = input('Input command (ex. help): ')
         cmd = cmd.split()
 
@@ -31,10 +32,25 @@ if __name__ == '__main__':
         else:
             print("Invalid command. Type 'help' for a list of commands.\n")
 
-    from Key_handler import certificate
-    u = gui.multenterbox("Get certificate of: ",'cert', ['Username', 'Init'])
-    c = certificate.Certificate.get(u[0], True)
-    c.verify()
+    # from Key_handler import certificate
+    # u = gui.multenterbox("Get certificate of: ",'cert', ['Username', 'Init'])
+    # c = certificate.Certificate.get(u[0], True)
+    # c.verify()
+
+
+    fin = b'halloashd\x00\xff\xdcbabdshallo'
+    fin2 = b'\x00\xff\xdcbabdshallo'
+    files = {'key': fin, 'data': fin2}
+
+
+    r = CONN.post('/data/tester/name', data={'shares':'admin'}, files=files)#, headers={'content-type': 'application/octet-stream'})
+    #r = CONN.get('/data/tester/name')#, data={'shares':'abcd'}, files=files)
+    print(r.status_code)
+    print(r.headers)
+    print(r.content)
+    print(r.content.split(b':_END_SECTION_:'))
+    # print(r.json())
+
 
     handler.stop()
     if USER.logout():

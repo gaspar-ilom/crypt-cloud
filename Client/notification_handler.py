@@ -26,6 +26,7 @@ class Notifications(object):
             return
         if not resp.status_code == 200:
             return False
+        print(resp.content)
         data = resp.json()
         assert(data['username'] == self.username)
         data.pop('username')

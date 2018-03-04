@@ -1,4 +1,4 @@
-from flask import Flask, session, escape#, redirect, url_for
+from flask import Flask, session, escape, json#, redirect, url_for
 from flask_restful import Api
 from flask_security import login_required
 from security import user_datastore, getSecurity
@@ -6,9 +6,13 @@ from Resources.certificate import Certificate
 from Resources.revocation_list import RevocationList
 from Resources.smp import SMP
 from Resources.notification import Notification
+from Resources.data_list import Data_List
+from Resources.data import Data
+from Resources.private_key import Private_Key
 from Models.certificate import Certificate as cm
 from Models.revocation import Revocation as rm
 from Models.notification import Notification as nm
+from Models.data import Data as dm
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '!ThisShouldBeRandom_123456$%)(#X^'
@@ -49,8 +53,15 @@ api.add_resource(Certificate, '/certificate/<string:username>')
 api.add_resource(RevocationList, '/revocation_list/<string:username>')
 api.add_resource(Notification, '/notification/<string:username>')
 api.add_resource(SMP, '/smp/<string:initiator>_<string:replier>/<string:step>')
-#api.add_resource(Data, '/data/<string:username>')
+api.add_resource(Data_List, '/data/<string:username>')
+api.add_resource(Data, '/data/<string:username>/<string:name>')
+api.add_resource(Private_Key, '/private_key/<string:username>')
 
+@api.representation('application/octet-stream')
+def binary(data, code, headers=None):
+    resp = api.make_response(data.data, code)
+    resp.headers.extend(headers or {})
+    return resp
 
 if __name__ == '__main__':
     from db import db

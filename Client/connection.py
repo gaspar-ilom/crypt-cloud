@@ -12,16 +12,16 @@ class Connection(object):
     def close(self):
         self.session.close()
 
-    def get(self, resource, data=None):
-        resp = self.session.get(self.server+resource, data=data)
+    def get(self, resource, data=None, files=None, headers=None):
+        resp = self.session.get(self.server+resource, data=data, files=files, headers=headers)
         return resp
 
-    def post(self, resource, data=None):
-        resp = self.session.post(self.server+resource, data=data)
+    def post(self, resource, data=None, files=None, headers=None):
+        resp = self.session.post(self.server+resource, data=data, files=files, headers=headers)
         return resp
 
-    def delete(self, resource, data=None):
-        resp = self.session.delete(self.server+resource, data=data)
+    def delete(self, resource, data=None, files=None, headers=None):
+        resp = self.session.delete(self.server+resource, data=data, files=files, headers=headers)
         return resp
 
 #Use for Singleton Session
