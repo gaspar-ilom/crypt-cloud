@@ -111,8 +111,6 @@ class User(object):
         response_post = CONN.post(resource, data=payload)
         if response_post.status_code == 200:
             return True
-        else:
-            raise ConnectionError("Cannot login. Please check your registration file!")
 
     def logout(self):
         resource = '/logout'
