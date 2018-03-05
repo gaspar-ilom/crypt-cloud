@@ -4,47 +4,73 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
-from Configuration.settings import PRIVATE_KEY_PASS
 from Configuration.settings import CA_KEY
+from functools import reduce
 from os import remove
+import easygui as gui
+import random
 
 class PrivateKey(object): #inherit from RSA key?
     key = None
     certificate = None
+    passphrase = None
 
     def __init__(self):
         self.key = self.load_key()
-        if not self.key:
-            self.key = self.generate_key()
-        self.certificate = self.load_certificate()
+        if self.key:
+            self.certificate = self.load_certificate()
 
     # Generate/load our private key
-    @classmethod
-    def load_key(cls):
+    def load_key(self):
+        if not self.load_passphrase():
+            return None
         #only create private key if not stored in file on disk!
         try:
             f = open("Configuration/myPrivateKey.pem", "rb")
             data = f.read()
             f.close()
-            return serialization.load_pem_private_key(data, PRIVATE_KEY_PASS, default_backend())
+            return serialization.load_pem_private_key(data, self.passphrase, default_backend())
         except FileNotFoundError:
             return None
 
-    @classmethod
-    def generate_key(cls):
+    def load_passphrase(self):
+        try:
+            with open("Configuration/private_passphrase.txt", "rb") as f:
+                self.passphrase = f.read()
+            return True
+        except FileNotFoundError:
+            return None
+
+    def generate_random_words(self):
+        with open("Configuration/english.txt", "r") as f:
+            words = f.readlines()
+        #random.SystemRandom() uses secure os.urandom() to select 12 random words from a 2048 english wordlist
+        words = list(map(lambda x: x[:-1], words))
+        passphrase = reduce(lambda x, y: x+words[random.SystemRandom().randrange(2048)]+' ', range(12),'')[:-1]
+        self.passphrase =  bytes(passphrase, 'utf-8')
+        with open("Configuration/private_passphrase.txt", "wb") as f:
+            f.write(self.passphrase)
+        gui.msgbox("Please note down this 12-words passphrase and store it in a secure place. In case you lose your private key you may use it to recover your account. It is also necessary to add new devices to your account. As long as you still have access to one device you may always recover this passphrase.",'IMPORTANT: SECURE PASSPHRASE')
+        gui.msgbox("{}".format(passphrase),'IMPORTANT: SECURE PASSPHRASE')
+        return passphrase
+
+    def generate_key(self):
         key = rsa.generate_private_key(
             public_exponent=65537,
             key_size=4096,
             backend=default_backend()
             )
+        self.generate_random_words()
         # Write our key to disk for safe keeping -> should be stored securely in production
+        encrypted_key = key.private_bytes(
+        encoding=serialization.Encoding.PEM,
+        format=serialization.PrivateFormat.TraditionalOpenSSL,
+        encryption_algorithm=serialization.BestAvailableEncryption(self.passphrase),
+        )
         with open("Configuration/myPrivateKey.pem", "wb") as f:
-            f.write(key.private_bytes(
-            encoding=serialization.Encoding.PEM,
-            format=serialization.PrivateFormat.TraditionalOpenSSL,
-            encryption_algorithm=serialization.BestAvailableEncryption(PRIVATE_KEY_PASS),
-            ))
-        return key
+            f.write(encrypted_key)
+        self.key = key
+        return encrypted_key
 
     def load_certificate(self):
         #only create certificate if not stored in file on disk!
@@ -61,14 +87,35 @@ class PrivateKey(object): #inherit from RSA key?
         with open("Configuration/myCertificate.pem", "wb") as f:
             f.write(certificate)
 
+    def enter_passphrase(self):
+        self.passphrase = bytes(gui.passwordbox("Please enter your secure 12-words passphrase to decrypt your private key.",'SECURE PASSPHRASE'), 'utf-8')
+        with open("Configuration/private_passphrase.txt", "wb") as f:
+            f.write(self.passphrase)
+
+    def delete_passphrase(self):
+        self.passphrase = None
+        remove("Configuration/private_passphrase.txt")
+
+    def set_key(self, key):
+        self.enter_passphrase()
+        try:
+            self.key = serialization.load_pem_private_key(key, self.passphrase, default_backend())
+        except ValueError:
+            print("valuerr")
+            answer = gui.ynbox("Incorrect Passphrase. Try again?", 'ERROR', ('Yes', 'No'))
+            if not answer:
+                self.delete_passphrase()
+                quit()
+            self.set_key(key)
+        with open("Configuration/myPrivateKey.pem", "wb") as f:
+            f.write(key)
+
     def revoke(self, resp):
         rev = x509.load_pem_x509_crl(bytes(resp.json()['revocation_list'], 'utf-8'), default_backend())
         if rev.is_signature_valid(CA_KEY):
             for r in rev:
                 if r.serial_number == self.certificate.serial_number:
                     remove("Configuration/myCertificate.pem")
-                    remove("Configuration/myPrivateKey.pem")
-                    self.key = None
                     self.certificate = None
                     print("Your certificate has been revoked succesfully.")
                     return True

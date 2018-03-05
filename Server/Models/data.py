@@ -9,7 +9,7 @@ class Data(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     user = db.relationship("User", foreign_keys=[user_id])
     key = db.Column(db.LargeBinary, nullable=False)
-    data = db.Column(db.LargeBinary, nullable=False)
+    data = db.Column(db.Text, nullable=False)
 
     def __init__(self, name, user_id, key, data, shares=None):
         self.name = name
@@ -64,7 +64,7 @@ class Data(db.Model):
         return {'data': self.data, 'username': self.user.username, 'key': self.key, 'name': self.name}
 
     def prepare_answer(self):
-        answer = self.key + b':_END_SECTION_:' + self.data + b':_END_SECTION_:'
+        answer = self.key + b'_END_KEY_' + self.data + b'_END_DATA_'
         shares = Data_Access.get(data_id=self.id)
         if not shares:
             return Response(answer, status=200, mimetype='application/octet-stream')

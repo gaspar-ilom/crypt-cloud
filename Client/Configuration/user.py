@@ -1,4 +1,4 @@
-import json
+import json, os
 from bs4 import BeautifulSoup as bs
 from connection import CONN
 from Key_handler.private_key import PrivateKey
@@ -30,10 +30,19 @@ class User(object):
             with open("Configuration/user.conf", "r") as f:
                 data = f.read().split()
             user = User(data[0], data[1], data[2])
-            user.login()
+            if not user.login():
+                return None
             user.set_private_key()
             return user
         except FileNotFoundError:
+            if gui.ynbox("Do you want to enter your credentials for an existing account? Otherwise you will be asked to register an account.", 'Existing Account?', ('Yes', 'No')):
+                username, email, password = gui.multpasswordbox("Enter account information:",'Account', ['Username', 'Email', 'Password'])
+                if username and email and password:
+                    user = User(username, email, password)
+                    if user.login():
+                        user.save()
+                        user.set_private_key()
+                        return user
             return None
 
     def set_csrf_token(self, resp):
@@ -44,8 +53,25 @@ class User(object):
 
     def set_private_key(self):
         self.private_key = PrivateKey()
+        if not self.private_key.key:
+            if not self.retrieve_private_key():
+                key = self.private_key.generate_key()
+                print("Upload encrypted key to server.")
+                resp = CONN.post('/private_key/'+self.username ,data={"key": str(key, 'utf-8')})
+                if not resp.status_code == 200:
+                    print(resp.json())
         if not self.private_key.certificate:
             self.get_certificate()
+
+    def retrieve_private_key(self):
+        resp = CONN.get('/private_key/'+self.username)
+        if resp.status_code == 200:
+            key = resp.json()['private_key']
+            if key:
+                print('Retrieved key from server.')
+                self.private_key.set_key(bytes(key, 'utf-8'))
+                return True
+        #print(resp)
 
     def get_certificate(self):
         csr = self.private_key.createCSR(self.username)
@@ -69,6 +95,15 @@ class User(object):
             private_key = self.private_key
         private_key.revoke(resp)
         return True
+
+    def delete_private_key(self):
+        self.revoke_certificate()
+        resp = CONN.delete('/private_key/'+self.username)
+        os.remove("Configuration/myPrivateKey.pem")
+        self.private_key.delete_passphrase()
+        if not resp.status_code == 200:
+            print(resp.json())
+        self.private_key = None
 
     def register(self):
         resource = '/register'

@@ -9,5 +9,4 @@ def get_CA_key():
 
 SERVER_HOST = 'localhost'
 SERVER_PORT = '5000'
-PRIVATE_KEY_PASS = bytes("MySecurePassphrase", 'utf-8')
 CA_KEY = get_CA_key()

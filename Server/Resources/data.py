@@ -50,8 +50,14 @@ class Data(Resource):
             if not User.get_username_by_id(session["user_id"]) in res.get_shares(session["user_id"]):
                 return {'message': "You may not upload data to another user's storage."}, 400
         data = self.parser.parse_args()
-        d = data['data'].read()
-        key = data['key'].read()
+        if data['data']:
+            d = data['data'].read()
+        else:
+            d = None
+        if data['key']:
+            key = data['key'].read()
+        else:
+            key = None
         shares = data['shares']
         if shares:
             u = User.find_by_name(shares)

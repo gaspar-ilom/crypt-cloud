@@ -185,11 +185,20 @@ class Certificate(object):
         return False
 
     @classmethod
+    def get_certificate_list(cls, username_list):
+        c_list = []
+        for u in username_list:
+            c = cls.get_for_share(u)
+            if c:
+                c_list += [c.certificate]
+        return c_list
+
+    @classmethod
     def get_for_share(cls, username):
         c = cls.get(username)
         if not c:
             return None
-        if c.verify() or c.confirm_using_unverified_certificate():
+        if c.verified or c.verify() or c.confirm_using_unverified_certificate():
             return c
         return None
 

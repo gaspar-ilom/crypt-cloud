@@ -16,14 +16,16 @@ class User(db.Model, UserMixin):
     notifications = db.relationship('Notification', back_populates="user")
 
     def get_private_key(self):
-        return {'private_key': str(self.private_key, 'utf-8')}
+        if self.private_key:
+            return {'private_key': str(self.private_key, 'utf-8')}
+        return {'private_key': None}
 
     def set_private_key(self, key):
         self.private_key = bytes(key, 'utf-8')
         db.session.commit()
 
     def delete_private_key(self):
-        self.private_key = random_serial_number
+        self.private_key = None
         db.session.commit()
 
     def get_security_payload(self):
