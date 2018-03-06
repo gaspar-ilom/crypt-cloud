@@ -1,16 +1,29 @@
+import easygui as gui
+from Data.overview import retrieve_file_list
+from Data.encryption import File
+from Key_handler.certificate import Certificate
+from Configuration.user import USER
 
 def menu():
     pass
-    # choice = gui.buttonbox("What do you want to do with the file '{}/{}'?".format(self.owner, self.name), 'File Options', ('Delete file', 'Add user to share', 'Remove user from share', 'Update file on server', 'Download', 'Cancel'))
-    # if not choice or choice == 'Cancel':
-    #     return
-    # if choice == 'Delete file':
-    #     self.delete()
-    # elif choice == 'Add user to share':
-    #     self.share()
-    # elif choice == 'Remove user from share':
-    #     self.remove_share()
-    # elif choice == 'Update file on server':
-    #     self.update_online()
-    # elif choice == 'Download':
-    #     self.store_locally()
+    choice = gui.buttonbox("What do you want to do?", 'Main Menu', ('Access my Files (Share/Download/Delete etc.)', 'Upload new File', 'Verify User Certificate', 'Revoke my Certificate', 'Delete Private Key (includes revocation)', 'Quit'))
+    if not choice:
+        return False
+    if choice == 'Quit':
+        return True
+    if choice == 'Access my Files (Share/Download/Delete etc.)':
+        retrieve_file_list()
+    elif choice == 'Upload new File':
+        f = File()
+        f.initiate()
+        f.options()
+    elif choice == 'Verify User Certificate':
+        username = gui.enterbox("Please enter the username for certificate you want to verify.", 'Certificate Verification')
+        if username:
+            c = Certificate.get(username)
+            c.verify()
+    elif choice == 'Revoke my Certificate':
+        USER.revoke_certificate()
+    elif choice == 'Delete Private Key (includes revocation)':
+        USER.delete_private_key()
+    return False
