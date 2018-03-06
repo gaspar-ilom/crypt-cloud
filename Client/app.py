@@ -50,7 +50,7 @@ if __name__ == '__main__':
     f.initiate()
     f.share('admin')
     f.share('admin')
-    # fr = File.retrieve('tester', 'Z0FBQUFBQmFuZEczVG5seUphajhyeFQzdm01TWRUd0tWM2NRYTNnSHd2WFlOLXdETTNHZXVZMzM3YzZ5QzB0VnVUUEprcDVFYWsyWDhiNkQtWlhmM28wM3VSVDlJSzFuWkE9PQ==')
+    fr = File.retrieve('tester', 'Z0FBQUFBQmFubG5rZkJiaEJNdUlEdHpmMW1DMzBtQ2xRaFhlWmVFZVlBZmxyNFhiTi1YemZrd2Y4VG9FNkt6SFpiYVVIX1dMbTdBemd1NVZ0UXhROC1IcFc1SlVDa2FxYlE9PQ==')
 
     handler.stop()
     if USER.logout():

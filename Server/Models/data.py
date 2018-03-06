@@ -9,7 +9,7 @@ class Data(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     user = db.relationship("User", foreign_keys=[user_id])
     key = db.Column(db.LargeBinary, nullable=False)
-    data = db.Column(db.Text, nullable=False)
+    data = db.Column(db.LargeBinary, nullable=False)
 
     def __init__(self, name, user_id, key, data, shares=None):
         self.name = name

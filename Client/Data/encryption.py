@@ -21,7 +21,6 @@ class File(object):
             self.owner = username
         self.set_key(key)
         if self.key:
-            print(self.key)
             self.fernet = Fernet(self.key)
 
     def initiate(self):
@@ -42,15 +41,17 @@ class File(object):
         r = CONN.post('/data/{}/{}'.format(self.owner, self.encrypted_name), files=files)
         if r.status_code == 200 and username_list:
             map(lambda x: self.share(x), username_list)
-        self.check()
+        # self.check(r.content)
         if not r.status_code == 200:
             print(r.text)
 
-    def check(self):
-        keys, data, shares, complete_keys = self.parse_data_from_server()
+    def check(self, r=None):
+        keys, data, shares, complete_keys = self.parse_data_from_server(r)
         self.decrypt_name()
+        # print('retrieved_data')
+        # print(data)
         self.decrypt(data)
-        print("Success")
+        print("Check Success")
 
     @classmethod
     def retrieve(cls, owner, encrypted_name):
@@ -63,7 +64,8 @@ class File(object):
             gui.msgbox("Could not retrieve a valid key at this URL.")
             return None
         f.decrypt_name()
-        f.data = f.decrypt(data)
+        print(f.name)
+        f.decrypt(data)
         f.set_path()
         f.update_data()
         return f
@@ -78,13 +80,12 @@ class File(object):
                 return True
             i+=2
 
-
     def parse_data_from_server(self, r=None):
         if not r:
             r = CONN.get('/data/{}/{}'.format(self.owner, self.encrypted_name)).content
         complete_keys = r.split(b'_END_KEY_')[0]
         keys = complete_keys.split(b':END:')
-        data = r.split(b'_END_KEY_')[0].split(b'_END_DATA_')[0]
+        data = r.split(b'_END_KEY_')[1].split(b'_END_DATA_')[0]
         shares = r.split(b'_END_DATA_')[0].split(b'_')
         user_key_list = []
         for k in keys:
