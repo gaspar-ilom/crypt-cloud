@@ -1,5 +1,6 @@
 from connection import CONN
 from Key_handler.certificate import Certificate
+from Data.encryption import File
 import time, threading, json
 import easygui as gui
 
@@ -35,20 +36,27 @@ class Notifications(object):
 
     def handle(self):
         for n in self.list:
-            if n.startswith('/smp/'):
-                #print("SMP request retrieved: {}".format(n))
-                user = n.split('/')[2].split('_')[0]
-                verify = gui.ynbox("Retrieved SMP verification request from user {}. Accept and start verification now? (Y/n)".format(user), '[NOTIFICATION]', ('Yes', 'No'))
-                #catch errors?!
-                if verify:
-                    c = Certificate.get(user)
-                    if c:
-                        c.verify(smp=2)
-            elif n.startswith('/data/'):
-                #TODO implement handle new data shared by someone
-                gui.msgbox("New Data shared. Retrieve by requesting: {}".format(n), '[NOTIFICATION]')
-            else:
-                gui.msgbox("Unknown Notification. Handle Manually: {}".format(n), '[NOTIFICATION]')
+            try:
+                if n.startswith('/smp/'):
+                    #print("SMP request retrieved: {}".format(n))
+                    user = n.split('/')[2].split('_')[0]
+                    verify = gui.ynbox("Retrieved SMP verification request from user {}. Accept and start verification now? (Y/n)".format(user), '[NOTIFICATION]', ('Yes', 'No'))
+                    #catch errors?!
+                    if verify:
+                        c = Certificate.get(user)
+                        if c:
+                            c.verify(smp=2)
+                elif n.startswith('/data/'):
+                    owner, enc_name = File.parse_file_url(n)
+                    f = File.get_name(owner, enc_name)
+                    if f:
+                        access = gui.ynbox("New Data shared with you: {}/{}".format(owner, f.name), '[NOTIFICATION]', ('Access now', 'Cancel'))
+                        if access:
+                            f.options()
+                else:
+                    gui.msgbox("Unknown Notification. Handle Manually: {}".format(n), '[NOTIFICATION]')
+            except RuntimeError:
+                print('RuntimeError: Notifications Database is somehow messed up! -> Please check and clean it at the server!')
             self.delete(n)
 
     def delete(self, notification):

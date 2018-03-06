@@ -11,7 +11,6 @@ class User(db.Model, UserMixin):
     confirmed_at = db.Column(db.DateTime())
     private_key = db.Column(db.LargeBinary)
     roles = db.relationship('Role', secondary=roles_users, backref=db.backref('users', lazy='dynamic'))
-    #data = db.relationship('Data_Access', back_populates="user")
     certificates = db.relationship('Certificate', back_populates="user")
     notifications = db.relationship('Notification', back_populates="user")
 

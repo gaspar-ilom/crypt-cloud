@@ -1,7 +1,7 @@
 from db import db
 from flask import Response
 from Models.joins import Data_Access
-
+from Models.notification import Notification
 
 class Data(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
@@ -30,6 +30,7 @@ class Data(db.Model):
             self.data = data
         if shares:
             if not Data_Access.get(user_id=shares, data_id=self.id):
+                Notification.add("/data/{}/{}".format(self.user.username, self.name), shares)
                 Data_Access(shares, self.id).save_to_db()
         db.session.commit()
 
@@ -37,6 +38,7 @@ class Data(db.Model):
         share = Data_Access.get(user_id=user_id, data_id=self.id)
         if share:
             for s in share:
+                Notification.delete(user_id=user_id, data="/data/{}/{}".format(self.user.username, self.name))
                 s.delete_from_db()
 
     def get_shares(self, user_id=None):
@@ -56,6 +58,7 @@ class Data(db.Model):
         d = Data_Access.get(data_id=self.id)
         if d:
             for item in d:
+                Notification.delete(user_id=item.user_id, data="/data/{}/{}".format(self.user.username, self.name))
                 item.delete_from_db()
         db.session.delete(self)
         db.session.commit()

@@ -6,6 +6,7 @@ class Notification(db.Model):
     data = db.Column(db.Text, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     user = db.relationship("User", back_populates="notifications")
+    unique_constraint = db.UniqueConstraint('data', 'user_id')
 
     def __init__(self, data, user_id):
         self.data = data

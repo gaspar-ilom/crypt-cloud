@@ -35,7 +35,7 @@ class User(object):
             user.set_private_key()
             return user
         except FileNotFoundError:
-            if gui.ynbox("Do you want to enter your credentials for an existing account? Otherwise you will be asked to register an account.", 'Existing Account?', ('Yes', 'No')):
+            if gui.ynbox("Do you want to enter your credentials for an existing account? Otherwise you will be asked to register an account.", 'Existing Account?', ('Existing Account', 'Register new Account')):
                 username, email, password = gui.multpasswordbox("Enter account information:",'Account', ['Username', 'Email', 'Password'])
                 if username and email and password:
                     user = User(username, email, password)
