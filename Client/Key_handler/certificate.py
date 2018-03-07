@@ -32,7 +32,7 @@ class Certificate(object):
     def retrieve(cls, username):
         resp = CONN.get('/certificate/'+username)
         if not resp.status_code == 200:
-            gui.msgbox(resp.text, 'ERROR')
+            print(resp.text)
             return None
         try:
             r = resp.json()
@@ -123,7 +123,13 @@ class Certificate(object):
              return False
 
     def verify(self, smp=None, qr=None):
+        if not USER.private_key or not USER.private_key.certificate:
+            gui.msgbox("Verification is not possible if you do not have a valid certificate yourself! Create a new certificate first.")
+            return False
         username = self.certificate.subject.get_attributes_for_oid(NameOID.COMMON_NAME)[0].value
+        if username == USER.username:
+            gui.msgbox("You do not need to verify your own certificate.")
+            return True
         if not smp and not qr:
             if self.verified:
                 answer = gui.ynbox("Certificate is already verified. Verify again?", 'Already verified', ('Yes', 'No'))
@@ -133,17 +139,17 @@ class Certificate(object):
                 resp = gui.ynbox('Do you want to verify {}`s certificate now? (Y/n)'.format(username), ('Yes', 'No'))
                 if not resp:
                     return False
-                resp = gui.buttonbox("Please choose a method for verification:\n\
-                SMP - requires you to share a secret word with {} and both be online simultaneously\n\
-                QR-Codes - requires you to scan QR codes from each others' devices".format(username), 'Verification Method', ('SMP', 'QR-Code (Display)', 'QR-Code (Scan)', 'Abort'))
-                if resp == 'SMP':
-                    smp = 1
-                elif resp == 'QR-Code (Display)':
-                    qr= 1
-                elif resp == 'QR-Code (Scan)':
-                    qr= 2
-                elif resp == 'Abort':
-                    return False
+            resp = gui.buttonbox("Please choose a method for verification:\n\
+            SMP - requires you to share a secret word with {} and both be online simultaneously\n\
+            QR-Codes - requires you to scan QR codes from each others' devices".format(username), 'Verification Method', ('SMP', 'QR-Code (Display)', 'QR-Code (Scan)', 'Abort'))
+            if resp == 'SMP':
+                smp = 1
+            elif resp == 'QR-Code (Display)':
+                qr= 1
+            elif resp == 'QR-Code (Scan)':
+                qr= 2
+            elif resp == 'Abort':
+                return False
         if smp == 1:
             s = SMP(USER.private_key.certificate, self.certificate, initiator=True)
             self.verified = s.verify()

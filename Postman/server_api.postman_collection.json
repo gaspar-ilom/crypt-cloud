@@ -70,7 +70,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"csrf_token\": \"IjIzYTk0Y2Y0Y2M0OTlkMTc4OWRiM2VjNzcxZmQwNjlkN2QxNDg0ZDEi.DU4EqQ.wRBOLkhe2KbB4QAsNKNK0f6SbTE\",\n    \"email\": \"admin\",\n    \"password\": \"test123\",\n    \"remember\": \"y\"\n}"
+					"raw": "{\n    \"csrf_token\": \"Ijc3MzQ5N2Y3NjA5YWFmMWQwMzVlM2JiYWM2ZDgxYzEzMTNhMTQxN2Yi.DX3gpA.Lm9t7bQFrVW6s_PP4iecpXkhSMA\",\n    \"email\": \"admin\",\n    \"password\": \"test123\",\n    \"remember\": \"y\"\n}"
 				},
 				"url": {
 					"raw": "http://127.0.0.1:5000/login",
@@ -797,6 +797,153 @@
 						"smp",
 						"tester_admin",
 						"step1"
+					]
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "http://127.0.0.1:5000/data/admin",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://127.0.0.1:5000/data/admin",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5000",
+					"path": [
+						"data",
+						"admin"
+					]
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "http://127.0.0.1:5000/data/admin/file_name",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://127.0.0.1:5000/data/admin/file_name",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5000",
+					"path": [
+						"data",
+						"admin",
+						"file_name"
+					]
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "http://127.0.0.1:5000/data/tester/name",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://127.0.0.1:5000/data/tester/name",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5000",
+					"path": [
+						"data",
+						"tester",
+						"name"
+					]
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "http://127.0.0.1:5000/private_key/admin",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"key\": \"'-----BEGIN RSA PRIVATE KEY-----\\nProc-Type: 4,ENCRYPTED\\nDEK-Info: AES-256-CBC,F47B920E5E8888E98528E37A01BB0923\\n\\nKhmqCFW3rAeOcqpgb1HwmaU99RTa81kRPwTdEW+88a8XO6fYOdH1AQcx9fmA4TUh\\nQ6tdrEKbEsg03joZp6itnzT//FyLP3zpFsYo+rqcE/WyL7TuHBv6/PXKYwOcOeUc\\nRLHA2ZXJrk7cLMUduCI63huLOxLpaynryYOG28lllkjQhNTlCz6g3z6LrXhuJMhG\\n90zSWstHc5CpMMY8mBxutk1j6r5VvboL0sIfIWFq81ksjbwYcX7kv3VQ8ZHngsZd\\nIw81gcM46yoh/rLK4wV+3LNsbO08Ih/tjxckJTu8imMXGJ1h4XkXkjB7dwl2gCg8\\noqGB8l57By7KW2t0clZ1ARNbNUVnzy/gj46SuRW4x1unPzgmBQqEhoXDIQGB8IiM\\nPFDTLzko4eCSj3BLKhpkVMnCj6Cq5LImNi1d6Scl7IJ+DETk9mtiT/Z93iqVdSih\\nxmsHCds8vKEHHUBUfmY82HQTq0xJrzdjP+HpRTBAeHieRUaNqENxkYyXT6xZml4i\\nfp9oCRgi1Xj40Hplco9q9gJy5eVUHaCkbXiEmtqeSqfdke0M84Ax+ZRh8zJ9QxtZ\\n1atTaUxoNG5S+JEieKalwMmSqSnNYUXcvGF1eySQY2XJdnBBuci5kP9yqbuCXuzs\\nagk1nOv9m4BZCpqQExhb8Ld/yP9sMkvzpX5IKJQkTVp7lc271B72sTvneVnWG8OK\\nfhROcIMIzh66YGD8iCpjrtwwGeNLsotNTMFaZTqUp+AbsIuDj96vpl3wlcSRobyU\\nVd3bhxuMFH1SA8FAk8NjLG6lUXwP2I5UTximYgrM8TMh3KxexJRL1PCWRBlCOQjJ\\nHN6e2HbEOLkIuKwMO9KJ3Jk3se2fg5fwllHNyB/OPLYf8zvkotBExk8DwrE+thsY\\n1tgOfNCCkMnwq/rpWw4TrLV7dqupD6aag9mdEC8p3sdYm6S3Fcq9sNyTLEGf8zbK\\nwjcW+nOz50af2EYV0xQ7FQVr6iZ778SF9wmsrhKMudRmddsCDXaQsfUzB239teCt\\nqSm6qNyPu3SLhbu9MJO1E4T6cQFtFh22wmduTWFNW+MLn6RFl+re/ZSLB2jlN5td\\n4xYEFurdRz7cbG/VErEJTjxt8hxPNJCGOUIn2ZHkZFwazp3Uz/4XQ23LrN13eFS+\\nhUv5b+qxFqk7D+r7OVNvqEZ4uPGhMghq6k4lpHBD/LYXgqa6c1I/oAKWPirVRR+a\\nNRkAzNoYcK/7+DSjtTov39df7MJguuNWAPFDd4tyJM1xpk/Q955JDbATT8/RsqH3\\nTrNnMmiYpC0plzCajbzDzXv0Zo8Zw8ZP/Y9JuxkRd2UrLpkz+pXHKovg+D0ttWjp\\nBhhZl62SfEd2/xC+vbyeGvnQzUeh3+l+S6nZGVlrQg71FhXmGBNf1alHH9RUJFhM\\nWBUmRvhW6LFEjbx0o4BUgZEDWN0PNIEU596r3qPbE5Jpaf7SPwtoqm+xP3hgx4r5\\nOpal/BKHefDK4SyiWRVyGNV2KNeSMx9pGOwD3fzCLG3RH4crcYoDu4Wu+vnJy6zu\\nD9KY6mafSlOeEiACqkc9HFvC0RSOerIAqQZOS5QyEbu0AffiVpT6yi5gye36Fx4s\\nEnYJC/L7VmHUavPTz9IFlqDOQAVzjc9xmHWfGbJgecFk0MDFJFZ73OMPx0YWLfew\\nxuO3kVkat/3Ccr4NUPLlW3G046SA7EhYAZ8WgJtBIqL8Ydkk6+MP8dj8NIXiRqX8\\nHH7Pnu4AmOOgfQdrfQM5hAvrYALeYf6G+QgVax8ymFPxcLCVbmXuZknbtW7AApVD\\nBOl3uMCBnpfNDPoXAAW+cMvQjRw65Nq/ugO5s+8DKgSG+dru5yZBemwKOt+ody1J\\nuTJByl4z1JeZx4KqtIfWBBpkGmtvTQwI3P7ym96ZcevtMhZ94zH1/zP1rOW3b6Oy\\nmaCoUNTOrROl5Y+6Dc10RiFJ3Yt4sAxHlWNXf8DIV+KXaoKEHRD6di6wuZ+rWN4s\\nei5RJcqDtaRO151+FSxAQ76Agh5l7k5601d+VeJnRxSJYkPSyIKZG4lUkpzJ2yZR\\n85hX8MA0V8FfsQA1ZyMhGycAtC74/osfxYsITFdv/O5imq3cZ8qXzjriLnxXhAE1\\nhhZWEQbJOVV6TG9R4szlUIc91FRxQGaerQUC+U+WTSD6Ks7OJJRBXNJLVUQTbnjw\\nnXHaXHDEOSNFOUsncm3v2/pZ8+tr4PT88PzIj8adnRzjJOQqcWjKRLLcK7nX12cZ\\nF69mzdX+87UGM1oTF4wE1zFovQ2PoIb/VEsmimZvd7as47GPU7tJgPaCZYXN7CsU\\n8gxm7nB7SA+rn50f680BdNv7/8aH/HazE/3E9Zws90zyr5SVGvRaWP4mGVHuaoB2\\nfP0NqQoW90QyxiXco4nUrpTaK8FZrSnZj845gEKaez6aChLA+wsWpll2D90uiraz\\np0NV24uc0ZGpvhmDK/9d0YoOT46U/yF4w8zSiXUZ43wwyne1/BGz0ir7UhRGr6J4\\nuERawk1dRNug4IGj2teVNooGN6teWgZWreD7EvXBFEFKaA52olmaqBACkTzam4UV\\nMkSKBF5zZwC5TgyyFRdvIKePtPs3wDsSXxhsZenGosOx7oKtV2WfQmJeF6iJmwGF\\neRO79O+eNTT1ndS0Yrcls5DpI4S0y5vkeTVran6WNNij+qLZ0E+Ge4QL+3wDr2Q1\\nTy35+P6pG5xoiBMqZcs8XMNax+DpxkOeBdTg9BV0lNO4XByklfni9ACjeh4NaOW2\\nuvREWsggi7luCJvR3B/nNcg7zhkDdopr/F2lgo19kUjZwHh1F9rNw3B7xXCvLxrp\\nYYeq4WFFvoEzkmFmjJOE7RH3uqVaBMfD878IBVouQvEqudc+on1OAcPgAVo6b/VE\\npRJC+bqKpGltLYe4cFrBjalqIlE8HDBdxOKThjQW8ImhZbDTJaY004jYXKGnua6n\\nzGnSgD7UdMUblCCYzSmNsztQtg7gllUI9Qq9DR0zDRMOdt8+nL1a22NYDKKB0Jha\\nlzS15bj/K1LLe6Ppbb9USQ8etHaMsREw91qkIOQfpJFrnFRsC1ZldWfYmMRiOgA5\\n7aDae11JFMJeJfC/4hni4jo1/NI9sGjO3AMOr5Jdt81gz+Xm3BkrOnte21cop1q1\\n-----END RSA PRIVATE KEY-----\\n\"\n}"
+				},
+				"url": {
+					"raw": "http://127.0.0.1:5000/private_key/admin",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5000",
+					"path": [
+						"private_key",
+						"admin"
+					]
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "http://127.0.0.1:5000/data/admin",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://127.0.0.1:5000/data/admin",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5000",
+					"path": [
+						"data",
+						"admin"
 					]
 				},
 				"description": ""

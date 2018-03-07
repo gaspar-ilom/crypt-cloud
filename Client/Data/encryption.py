@@ -57,9 +57,9 @@ class File(object):
             gui.msgbox("User has no access to this URL.")
             return None
         if not f.get_key(keys):
-            f.delete()
-            gui.msgbox("Could not retrieve a valid key at this URL.")
-            return None
+            #f.delete()
+            #gui.msgbox("Could not retrieve a valid key at this URL.")
+            return f
         f.decrypt_name()
         return f
 
@@ -163,6 +163,8 @@ class File(object):
     @classmethod
     def retrieve(cls, owner, encrypted_name):
         f = cls.get_name(owner, encrypted_name)
+        if not f.name:
+            return None
         f.store_locally()
         return f
 
@@ -180,9 +182,13 @@ class File(object):
         i = 0
         while i < len(keys_list):
             if keys_list[i] == bytes(USER.username, 'utf-8'):
-                self.key = USER.private_key.key.decrypt(keys_list[i+1], padding.OAEP(mgf=padding.MGF1(algorithm=hashes.SHA1()), algorithm=hashes.SHA1(), label=None))
-                self.fernet = Fernet(self.key)
-                return True
+                try:
+                    self.key = USER.private_key.key.decrypt(keys_list[i+1], padding.OAEP(mgf=padding.MGF1(algorithm=hashes.SHA1()), algorithm=hashes.SHA1(), label=None))
+                    self.fernet = Fernet(self.key)
+                    return True
+                except ValueError:
+                    print("Private Key could not decrypt file key. No access possible. Ask someone who still has access to reshare it with you. Otherwise you may only delete the file {}/{}".format(self.owner, self.encrypted_name))
+                    return False
             i+=2
 
     def parse_data_from_server(self, r=None):

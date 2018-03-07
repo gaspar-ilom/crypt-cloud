@@ -331,6 +331,8 @@ class SMP_verifier(object):
     def initiate(self):
         self.clear()
         self.question, self.shared_secret = gui.multenterbox("Provide a question only your counterpart knows the answer of:",'SMP: Question and Shared Secret', ['Question', 'Shared Secret'])
+        if not (self.question and self.shared_secret):
+            return
         resp = CONN.post(self.resource+self.steps[self.step], data={"question": self.question})
         if not resp.status_code == 200:
             gui.msgbox("SMP verification initiation was not successful.\n{}".format(resp.json()), 'ERROR')
@@ -350,6 +352,8 @@ class SMP_verifier(object):
         #self.display()
         #provide answer
         self.shared_secret = gui.enterbox("Provide the answer to the following question, i.e. the secret you share with your counterpart:\n{}".format(self.question),'Shared Secret')
+        if not self.shared_secret:
+            return
         self.step += 1
         self.smp = SMP(self.initiator_certificate, self.replier_certificate, self.shared_secret)
         self.initiated = True
@@ -358,6 +362,7 @@ class SMP_verifier(object):
         if not self.initiated:
             self.clear()
             return False
+        print("Initiating SMP verification protocol...")
         if self.initiator:
             # Do the SMP protocol
             buffer = self.receive()
@@ -438,7 +443,7 @@ class SMP_verifier(object):
             resource += self.steps[0]
         else:
             resource += self.steps[1]
-        CONN.delete(resource)
+            CONN.delete(resource)
         self.shared_secret = None
         self.question = None
 

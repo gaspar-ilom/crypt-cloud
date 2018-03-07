@@ -1,6 +1,5 @@
-from flask import Flask, session, escape, json#, redirect, url_for
+from flask import Flask, session, escape
 from flask_restful import Api
-from flask_security import login_required
 from security import user_datastore, getSecurity
 from Resources.certificate import Certificate
 from Resources.revocation_list import RevocationList
@@ -39,14 +38,6 @@ def index():
         return escape("Logged in as {}.".format(user_datastore.get_user(session["user_id"]).get_security_payload()['username']))
     except:
         return "Not logged in.", 401
-
-# @app.route('/redir-test')
-# def hello():
-#     return redirect(url_for('foo'))
-#
-# @app.route('/foo')
-# def foo():
-#     return 'Hello Foo!'
 
 #Api Resources
 api.add_resource(Certificate, '/certificate/<string:username>')

@@ -50,7 +50,7 @@ class PrivateKey(object): #inherit from RSA key?
         self.passphrase =  bytes(passphrase, 'utf-8')
         with open("Configuration/private_passphrase.txt", "wb") as f:
             f.write(self.passphrase)
-        gui.msgbox("Please note down this 12-words passphrase and store it in a secure place. In case you lose your private key you may use it to recover your account. It is also necessary to add new devices to your account. As long as you still have access to one device you may always recover this passphrase.",'IMPORTANT: SECURE PASSPHRASE')
+        gui.msgbox("Please note down the following 12-words passphrase and store it in a secure place. In case you lose your private key you may use it to recover your account. It is also necessary to add new devices to your account. As long as you still have access to one device you may always recover this passphrase.",'New Private Key Generated')
         gui.msgbox("{}".format(passphrase),'IMPORTANT: SECURE PASSPHRASE')
         return passphrase
 
@@ -88,30 +88,44 @@ class PrivateKey(object): #inherit from RSA key?
             f.write(certificate)
 
     def enter_passphrase(self):
-        self.passphrase = bytes(gui.passwordbox("Please enter your secure 12-words passphrase to decrypt your private key.",'SECURE PASSPHRASE'), 'utf-8')
+        passphrase = gui.passwordbox("Please enter your secure 12-words passphrase to decrypt your private key.",'SECURE PASSPHRASE')
+        if not passphrase:
+            return False
+        self.passphrase = bytes(passphrase, 'utf-8')
         with open("Configuration/private_passphrase.txt", "wb") as f:
             f.write(self.passphrase)
+        return True
 
     def delete_passphrase(self):
         self.passphrase = None
-        remove("Configuration/private_passphrase.txt")
+        try:
+            remove("Configuration/private_passphrase.txt")
+        except FileNotFoundError:
+            pass
 
     def set_key(self, key):
-        self.enter_passphrase()
-        try:
-            self.key = serialization.load_pem_private_key(key, self.passphrase, default_backend())
-        except ValueError:
-            print("valuerr")
+        if self.enter_passphrase():
+            try:
+                self.key = serialization.load_pem_private_key(key, self.passphrase, default_backend())
+            except ValueError:
+                answer = gui.ynbox("Incorrect Passphrase. Try again?", 'ERROR', ('Yes', 'No'))
+                if not answer:
+                    self.delete_passphrase()
+                    self.key = None
+                    return
+                self.set_key(key)
+            with open("Configuration/myPrivateKey.pem", "wb") as f:
+                f.write(key)
+        else:
             answer = gui.ynbox("Incorrect Passphrase. Try again?", 'ERROR', ('Yes', 'No'))
             if not answer:
                 self.delete_passphrase()
-                quit()
+                self.key = None
+                return
             self.set_key(key)
-        with open("Configuration/myPrivateKey.pem", "wb") as f:
-            f.write(key)
 
-    def revoke(self, resp):
-        rev = x509.load_pem_x509_crl(bytes(resp.json()['revocation_list'], 'utf-8'), default_backend())
+    def revoke(self, rev_list):
+        rev = x509.load_pem_x509_crl(rev_list, default_backend())
         if rev.is_signature_valid(CA_KEY):
             for r in rev:
                 if r.serial_number == self.certificate.serial_number:
@@ -119,7 +133,7 @@ class PrivateKey(object): #inherit from RSA key?
                     self.certificate = None
                     print("Your certificate has been revoked succesfully.")
                     return True
-        print("Signature check failed for the revocation list of user "+username+"! Make sure you have the right CA (root) certificate. Otherwise there might be a Man in the middle attack or the CA might be misbehaving!")
+        print("Signature check failed for the revocation list! Make sure you have the right CA (root) certificate. Otherwise there might be a Man in the middle attack or the CA might be misbehaving!")
         return False
 
     # Generate a CSR, write it to file and return it

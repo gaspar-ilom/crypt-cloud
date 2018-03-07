@@ -2,7 +2,6 @@ import json, os
 from bs4 import BeautifulSoup as bs
 from connection import CONN
 from Key_handler.private_key import PrivateKey
-from getpass import getpass
 import easygui as gui
 
 class User(object):
@@ -56,7 +55,7 @@ class User(object):
         if not self.private_key.key:
             if not self.retrieve_private_key():
                 key = self.private_key.generate_key()
-                print("Upload encrypted key to server.")
+                print("Uploading encrypted key to server.")
                 resp = CONN.post('/private_key/'+self.username ,data={"key": str(key, 'utf-8')})
                 if not resp.status_code == 200:
                     print(resp.json())
@@ -70,10 +69,18 @@ class User(object):
             if key:
                 print('Retrieved key from server.')
                 self.private_key.set_key(bytes(key, 'utf-8'))
-                return True
-        #print(resp)
+                if self.private_key.key:
+                    return True
+        return False
 
-    def get_certificate(self):
+    def get_certificate(self, confirm=True):
+        if not self.private_key or not self.private_key.key:
+            if gui.ynbox("Do you want to generate a new Private Key?", 'No Private Key Found', ('Yes', 'No')):
+                self.set_private_key()
+            else:
+                return False
+        elif confirm and not gui.ynbox("Do you want to request a new certificate for your private key? (This should not be done if it has been compromised and not been deleted and regenerated since!)", 'New Certificate Signing Request', ('Yes', 'No')):
+            return False
         csr = self.private_key.createCSR(self.username)
         payload = {
             'csr': str(csr, 'utf-8')
@@ -82,6 +89,7 @@ class User(object):
         if resp.status_code == 200:
             cert = resp.json()['certificate']
             self.private_key.set_certificate(bytes(cert, 'utf-8'))
+            print("Succefully requested a new Certificate.")
             return True
         print(resp)
 
@@ -93,17 +101,33 @@ class User(object):
         resp = CONN.delete('/certificate/'+self.username, data=data)
         if not private_key:
             private_key = self.private_key
-        private_key.revoke(resp)
-        return True
+        if resp.status_code == 200 and resp.json()['revocation_list']:
+            rev_list = bytes(resp.json()['revocation_list'], 'utf-8')
+            private_key.revoke(rev_list)
+            return True
+        if resp.json()['message']:
+            if resp.json()['message'] == 'No valid certificate for user found.':
+                print("Certificate has already been revoked.")
+                return True
+        return False
 
     def delete_private_key(self):
         self.revoke_certificate()
         resp = CONN.delete('/private_key/'+self.username)
-        os.remove("Configuration/myPrivateKey.pem")
-        self.private_key.delete_passphrase()
-        if not resp.status_code == 200:
-            print(resp.json())
-        self.private_key = None
+        try:
+            os.remove("Configuration/myPrivateKey.pem")
+        except FileNotFoundError:
+            pass
+        if not self.private_key:
+            print("Private Key is already deleted.")
+        else:
+            self.private_key.delete_passphrase()
+            if not resp.status_code == 200:
+                print(resp.json())
+            self.private_key = None
+            print("Private Key was succesfully deleted.")
+        print("Generate a new private Key.")
+        self.set_private_key()
 
     def register(self):
         resource = '/register'
