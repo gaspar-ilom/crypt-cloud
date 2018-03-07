@@ -1,7 +1,7 @@
 from connection import CONN
 from Key_handler.certificate import Certificate
 from Data.encryption import File
-import time, threading, json
+import time, threading
 import easygui as gui
 
 class Notifications(object):

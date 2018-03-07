@@ -1,4 +1,4 @@
-import json, os
+import os
 from bs4 import BeautifulSoup as bs
 from connection import CONN
 from Key_handler.private_key import PrivateKey
@@ -102,7 +102,7 @@ class User(object):
     def revoke_certificate(self, private_key=None):
         data = None
         if private_key:
-            data = json.dumps({"cert_serial":str(private_key.certificate.serial_number, 'utf-8')})
+            data = {"cert_serial":str(private_key.certificate.serial_number, 'utf-8')}
         resp = CONN.delete('/certificate/'+self.username, data=data)
         if not private_key:
             private_key = self.private_key
