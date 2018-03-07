@@ -54,6 +54,11 @@ class User(object):
         self.private_key = PrivateKey()
         if not self.private_key.key:
             if not self.retrieve_private_key():
+                if not gui.ynbox("Do you want to generate a new Private Key? Without a Private Key the application will not work.", 'Generate Private Key', ('Generate Key', 'Quit')):
+                    if self.logout():
+                        print("Logged out.")
+                    CONN.close()
+                    quit()
                 key = self.private_key.generate_key()
                 print("Uploading encrypted key to server.")
                 resp = CONN.post('/private_key/'+self.username ,data={"key": str(key, 'utf-8')})

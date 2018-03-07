@@ -37,7 +37,8 @@ class Notifications(object):
         return True
 
     def handle(self):
-        #not possible because easygui cannot handle threads
+        #parallel notification ahndling is not possible because easygui cannot handle threads
+        self.retrieve()
         if len(self.list) < 1:
             print("No new notifications found.")
             return
