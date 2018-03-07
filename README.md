@@ -8,18 +8,24 @@ This is just a Proof of Concept and should not be used in production for a numbe
 Most settings for the server application can be changed in the main module 'app.py'. In particular this means the Database URI, Debug-Mode (which is set to True and must be set to False in production), the Secret Key, the Password Salt and the CA's Private Key Passphrase in
 'pki.py'.
 The Server stores all data in a Database. By default this is a Mysql Database, named "flaskserver", user "flask-server", password "test123", run at localhost. These values can be changed in 'app.py'.
+The root certificate will be created after the first request and stored as 'CA.pem' in the application directory. It should be copied to the Client (see below).
 
 ## Prerequisites:
-* flask
-* flask_security
-* flask_restful
-* flask_sqlalchemy
-* werkzeug
-* wtforms
-* cryptography
-* datetime, functools,
+* Python 3.5.2 (only Python version tested on Ubuntu 16.04)
 
-* mysql database
+* Flask (0.12.2)
+* Flask-RESTful (0.3.6)
+* Flask-Security (3.0.0)
+* Flask-SQLAlchemy (2.3.2)
+* Werkzeug (0.14.1)
+* WTForms (2.1)
+* cryptography (2.1.4)
+* mysqlclient (1.3.12)
+
+## Install Requirements
+Note that some of the prerequisites have dependencies of their own. So it is the easiest way to use pip:
+```pip install PACKAGE_NAME
+```
 
 ## Launch Server application
 ```python app.py
@@ -34,27 +40,25 @@ Data encryption is hybrid, i.e. for each file uploaded to the Server an AES-256-
 The Client provides a rudimentary gui, and will write some logs to stdout.
 
 ## Prerequisites:
+* Python 3.5.2 (only version tested on Ubuntu 16.04)
+* zbar http://zbar.sourceforge.net/
+* opencv https://sourceforge.net/projects/opencvlibrary/
+
 * cryptography (2.1.4)
 * easygui (0.98.1)
-* bs4
+* beautifulsoup4 (4.6.0)
+* bs4 (0.0.1)
 * zbar-py (1.0.4)
-* zbar (0.10) -> check which! and base application!
 * numpy (1.14.1)
 * opencv-python (3.4.0.12)
 * Pillow (5.0.0)
-* qrcode-5.3
-* requests
-* pathlib?
-* functools?
-* binascii
-* struct?
-* base64?
-* datetime, time, os, threading
-* random?
+* qrcode (5.3)
+* requests (2.18.4)
+* urllib3 (1.22)
 
-## Install
-
-```pip install ...
+## Install Requirements
+Note that some of the prerequisites have dependencies of their own. So it is the easiest way to use pip:
+```pip install PACKAGE_NAME
 ```
 
 ## Launch Client application

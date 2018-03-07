@@ -1,5 +1,5 @@
 import requests
-from Configuration.settings import SERVER_HOST, SERVER_PORT
+from Configuration.settings import SERVER_HOST, SERVER_PORT, CA_KEY
 
 class Connection(object):
     server = 'http://'+SERVER_HOST+':'+SERVER_PORT
@@ -27,3 +27,7 @@ class Connection(object):
 #Use for Singleton Session
 # Session() makes sure cookies persist, while multiple TCP Connections are opened, increasing performance in case of multiple requests
 CONN = Connection()
+if not CA_KEY:
+    CONN.get('/login')
+    print("Terminating application due to missing root certificate!")
+    quit()

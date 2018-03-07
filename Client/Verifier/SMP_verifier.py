@@ -405,7 +405,7 @@ class SMP_verifier(object):
         if self.smp.match:
             print("Secrets match.")
         else:
-            print("Secrets do not match.")
+            print("Secrets do not match.\n Man in the Middle Attack or using outdated certificates? Or using different secrets?")
         #Cleanup and return True only if protocol terminated within the required time limit = 5 min
         if not self.time_check():
             return False
@@ -421,7 +421,7 @@ class SMP_verifier(object):
         if passed:
             return True
         gui.msgbox("SMP took too long. Verification failed.", 'Info')
-        self.clear()
+        self.clear(init_delete=True)
         return False
 
     def receive(self):
@@ -436,11 +436,13 @@ class SMP_verifier(object):
             return base64.b64decode(buffer)
         return None
 
-    def clear(self):
+    def clear(self, init_delete=False):
         self.initiated = False
         resource = self.resource
         if self.initiator:
             resource += self.steps[0]
+            if init_delete:
+                CONN.delete(resource)
         else:
             resource += self.steps[1]
             CONN.delete(resource)
