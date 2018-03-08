@@ -69,7 +69,8 @@ pip install cryptography easygui beautifulsoup4 bs4 zbar-py numpy opencv-python 
 python app.py
 ```
 
-##Known Issues
+## Known Issues
+
 No display of camera image, when reading QR-Code from camera: https://github.com/skvark/opencv-python/issues/46
 pyzbar for python3 support: https://github.com/NaturalHistoryMuseum/pyzbar
 Unfortunately easygui does not handle threads well. So the user will only be informed of Notifications after each interaction with Main Menu. This could be changed to a shell-based interaction of by implementing a proper gui. In order to answer a SMP request refresh Notifications from time to time.
