@@ -24,12 +24,14 @@ The root certificate will be created after the first request and stored as 'CA.p
 
 ## Install Requirements
 Note that some of the prerequisites have dependencies of their own. So it is the easiest way to use pip:
-```pip install PACKAGE_NAME
-´´´
+```sh
+pip install PACKAGE_NAME
+```
 
 ## Launch Server application
-```python app.py
-´´´
+```sh
+python app.py
+```
 
 # CryptCloud Client
 The client stores most of its configuration in the 'Configuration' subfolder. In 'Configuration/settings.py' the host and port of the server can be specified. By default it loads the CA's root certificate from 'Configuration/CA.pem'. (Note this certificate is created automatically, when the server is first launched and should be copied to the Client's 'Configuration'-folder.)
@@ -58,17 +60,18 @@ The Client provides a rudimentary gui, and will write some logs to stdout.
 
 ## Install Requirements
 Note that some of the prerequisites have dependencies of their own. So it is the easiest way to use pip:
-```pip install PACKAGE_NAME
+```sh
+pip install PACKAGE_NAME
 ```
 
-## Launch Client application
-```python app.py
+## Launch Server application
+```sh
+python app.py
 ```
-
-LICENSE?
-
 
 ##Known Issues
 No display of camera image, when reading QR-Code from camera: https://github.com/skvark/opencv-python/issues/46
 pyzbar for python3 support: https://github.com/NaturalHistoryMuseum/pyzbar
 Unfortunately easygui does not handle threads well. So the user will only be informed of Notifications after each interaction with Main Menu. This could be changed to a shell-based interaction of by implementing a proper gui. In order to answer a SMP request refresh Notifications from time to time.
+
+#LICENSE
