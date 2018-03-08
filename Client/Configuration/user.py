@@ -42,6 +42,11 @@ class User(object):
                         user.save()
                         user.set_private_key()
                         return user
+                    else:
+                        terminate = gui.ynbox("Could not login to specified account.", 'Login failed', ('Quit', 'Register new Account'))
+                        if terminate:
+                            CONN.close()
+                            quit()
             return None
 
     def set_csrf_token(self, resp):
@@ -70,6 +75,7 @@ class User(object):
     def retrieve_private_key(self):
         resp = CONN.get('/private_key/'+self.username)
         if resp.status_code == 200:
+            print(resp.text)
             key = resp.json()['private_key']
             if key:
                 print('Retrieved key from server.')
@@ -161,6 +167,7 @@ class User(object):
             resp = CONN.get(resource)
         except:
             gui.msgbox("Connection was refused. Make sure the specified server is reachable.")
+            CONN.close()
             quit()
         if resp.text == "Logged in as {}.".format(self.username):
             return True
@@ -173,8 +180,24 @@ class User(object):
             'csrf_token': self.csrf_token,
             }
         response_post = CONN.post(resource, data=payload)
-        if response_post.status_code == 200:
+        if not response_post.status_code == 200:
+            return False
+        if response_post.text == "Logged in as {}.".format(self.username):
             return True
+        if response_post.status_code == 200:
+            try:
+                r = response_post.json()
+                if not r['meta']['code'] == 200:
+                    return False
+                if r['response']['user']['email'] == self.email and r['response']['user']['username'] == self.username:
+                    return True
+                else:
+                    self.logout()
+                    return False
+            except:
+                return False
+        else:
+            return False
 
     def logout(self):
         resource = '/logout'
