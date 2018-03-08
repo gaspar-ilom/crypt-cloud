@@ -1,5 +1,6 @@
 # CryptCloud
 Author: [Valentin Franck] <gaspar_ilom@campus.tu-berlin.de>
+
 This is just a Proof of Concept and should not be used in production for a number of reasons.
 * The Client application contains an unaudited implementation of a cryptographic protocol (SMP) and secret keys are not stored securely in general (i.e. they are stored as a file in the application foldes instead of using the OS' keyring for example. This is particularly troublesome because the server acts as the CA in a PKI.).
 * TLS is not switched on by default, but this could easily be done in both the server and the Client.
