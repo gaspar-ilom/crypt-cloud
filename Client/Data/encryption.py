@@ -39,15 +39,6 @@ class File(object):
             gui.msgbox("Could not retrieve data at this URL: /data/{}/{}".format(owner, encrypted_name))
             f.delete()
             return None
-        # if not data:
-        #     print('data')
-        # if not bytes(USER.username, 'utf-8') in shares:
-        #     print('no share')
-        #     print(shares)
-        # if not USER.username==owner:
-        #     print('not owner')
-        # if not f.get_key(keys):
-        #     print('no key')
         if not bytes(USER.username, 'utf-8') in shares and not USER.username==owner:
             print(USER.username)
             print(owner)
@@ -57,19 +48,19 @@ class File(object):
             gui.msgbox("User has no access to this URL.")
             return None
         if not f.get_key(keys):
-            #f.delete()
-            #gui.msgbox("Could not retrieve a valid key at this URL.")
             return f
         f.decrypt_name()
         return f
 
     def options(self):
         #gui.msgbox("Implement file handling!")
-        choice = gui.buttonbox("What do you want to do with the file '{}/{}'?".format(self.owner, self.name), 'File Options', ('Delete file', 'Add user to share', 'Remove user from share', 'Update file on server', 'Download', 'Cancel'))
+        choice = gui.buttonbox("What do you want to do with the file '{}/{}'?".format(self.owner, self.name), 'File Options', ('Delete file','List access rights', 'Add user to share', 'Remove user from share', 'Update file on server', 'Download', 'Cancel'))
         if not choice or choice == 'Cancel':
             return
         if choice == 'Delete file':
             self.delete()
+        elif choice == 'List access rights':
+            self.list_access()
         elif choice == 'Add user to share':
             self.share()
         elif choice == 'Remove user from share':
@@ -96,6 +87,22 @@ class File(object):
         else:
             print('Succesfully deleted {}'.format(self.name))
 
+    def list_access(self):
+        keys, data, shares, complete_keys = self.parse_data_from_server()
+        if not data or not shares or len(shares) < 1 or shares[0]==b'':
+            print("Only the owner has access rights. Cannot list access rights for other user for the file {}/{}".format(self.owner, self.name))
+            return
+        shares = list(map(lambda x: str(x, 'utf-8'), shares))
+        print(len(shares))
+        print(shares)
+        shares += [self.owner+ " (file owner)"]
+        choice = gui.choicebox("The following users have access to the file {}/{}. Select user to revoke access.".format(self.owner, self.name), 'Access rights', shares)
+        if choice:
+            if choice == 'Add more choices' or choice.endswith(" (file owner)"):
+                return
+            self.remove_share(choice)
+
+
     def remove_share(self, username=None):
         if not username:
             username = gui.enterbox('Enter username of the user to remove from share of {}.'.format(self.name), 'Remove from share')
@@ -105,18 +112,23 @@ class File(object):
             gui.msgbox("Cannot remove owner from a file share!")
             return
         keys, data, shares, complete_keys = self.parse_data_from_server()
-        if data:
-            new_key = b''
-            beginning = complete_keys.split(bytes(username, 'utf-8')+b':KEY:')[0]
-            rest = complete_keys.split(bytes(username, 'utf-8')+b':KEY:')[1]
-            if len(rest.split(b':END:')) == 1:
-                new_key = beginning.strip(b':END:')
-            else:
-                start = rest.find(b':END:')+len(b':END:')
-                new_key = beginning+rest[start:]
-            r = CONN.post('/data/{}/{}'.format(self.owner, self.encrypted_name), files={'key': new_key})
-            if not r.status_code == 200:
-                print(r.json())
+        if not data or not shares:
+            print("Unable to retrieve the file from server. Could not revoke {} access to the file {}/{}".format(username, self.owner, self.name))
+            return
+        if not bytes(username, 'utf-8') in shares:
+            print("{} does not have access to the file {}/{}. No rights revoked.".format(username, self.owner, self.name))
+            return
+        new_key = b''
+        beginning = complete_keys.split(bytes(username, 'utf-8')+b':KEY:')[0]
+        rest = complete_keys.split(bytes(username, 'utf-8')+b':KEY:')[1]
+        if len(rest.split(b':END:')) == 1:
+            new_key = beginning.strip(b':END:')
+        else:
+            start = rest.find(b':END:')+len(b':END:')
+            new_key = beginning+rest[start:]
+        r = CONN.post('/data/{}/{}'.format(self.owner, self.encrypted_name), files={'key': new_key})
+        if not r.status_code == 200:
+            print(r.json())
         share = {'shares':username}
         self.delete(share)
 
