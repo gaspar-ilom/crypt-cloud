@@ -5,9 +5,10 @@ import time, threading
 import easygui as gui
 
 class Notifications(object):
-    list = [] #not threadsafe so far! -> better user queue.Queue object!
+    list = []
     check = False
     threads = []
+    list_lock = threading.Lock() # makes the list thread-safe -> necessary because of easygui limitations regarding threads
 
     def __init__(self, USER):
         self.user = USER
@@ -31,17 +32,20 @@ class Notifications(object):
         data = resp.json()
         assert(data['username'] == self.username)
         data.pop('username')
+        self.list_lock.acquire()
         for key, value in data.items():
             if not value['data'] in self.list:
                 self.list.append(value['data'])
+                print("[NOTIFICATION] {}".format(value['data']))
+        self.list_lock.release()
         return True
 
     def handle(self):
         #parallel notification ahndling is not possible because easygui cannot handle threads
-        self.retrieve()
         if len(self.list) < 1:
             print("No new notifications found.")
             return
+        self.list_lock.acquire()
         for n in self.list:
             if n.startswith('/smp/'):
                 #print("SMP request retrieved: {}".format(n))
@@ -62,6 +66,7 @@ class Notifications(object):
             else:
                 print("[NOTIFICATION] Unknown Notification. Handle Manually: {}".format(n))
             self.delete(n)
+        self.list_lock.release()
 
     def delete(self, notification):
         data = {"data": notification}

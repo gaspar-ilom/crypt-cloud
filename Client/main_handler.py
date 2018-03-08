@@ -6,7 +6,7 @@ from Configuration.user import USER
 from notification_handler import Notifications
 
 HANDLER = Notifications(USER)
-#HANDLER.start()
+HANDLER.start()
 
 def menu():
     HANDLER.handle()
@@ -14,7 +14,7 @@ def menu():
     if not choice:
         return False
     if choice == 'Quit':
-        #HANDLER.stop()
+        HANDLER.stop()
         return True
     if choice == 'Access my Files (Share/Download/Delete etc.)':
         retrieve_file_list()
