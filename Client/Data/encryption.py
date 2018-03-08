@@ -26,8 +26,8 @@ class File(object):
     @classmethod
     def parse_file_url(cls, url):
         owner = url.split('/')[2]
-        name = url.split('/')[3]
-        return owner, name
+        enc_name = url.split('/')[3]
+        return owner, enc_name
 
     @classmethod
     def get_name(cls, owner, encrypted_name):

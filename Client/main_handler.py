@@ -19,7 +19,7 @@ def menu():
     if choice == 'Access my Files (Share/Download/Delete etc.)':
         retrieve_file_list()
     elif choice == 'See Notifications':
-        HANDLER.handle()
+        return False
     elif choice == 'Upload new File':
         f = File()
         f.initiate()

@@ -32,12 +32,17 @@ class Notifications(object):
         data = resp.json()
         assert(data['username'] == self.username)
         data.pop('username')
-        self.list_lock.acquire()
         for key, value in data.items():
             if not value['data'] in self.list:
                 self.list.append(value['data'])
-                print("[NOTIFICATION] {}".format(value['data']))
-        self.list_lock.release()
+                if value['data'].startswith('/data/'):
+                    owner, enc_name = File.parse_file_url(value['data'])
+                    print("[NOTIFICATION] {} shared a new file with you.".format(owner))
+                elif value['data'].startswith('/smp/'):
+                    user = value['data'].split('/')[2].split('_')[0]
+                    print("[NOTIFICATION] Retrieved an SMP verification request by {}".format(user))
+                else:
+                    print("[NOTIFICATION] {}".format(value['data']))
         return True
 
     def handle(self):
@@ -48,10 +53,8 @@ class Notifications(object):
         self.list_lock.acquire()
         for n in self.list:
             if n.startswith('/smp/'):
-                #print("SMP request retrieved: {}".format(n))
                 user = n.split('/')[2].split('_')[0]
                 verify = gui.ynbox("Retrieved SMP verification request from user {}. Accept and start verification now? (Y/n)".format(user), '[NOTIFICATION]', ('Yes', 'No'))
-                #catch errors?!
                 if verify:
                     c = Certificate.get(user)
                     if c:
@@ -76,7 +79,9 @@ class Notifications(object):
     def loop(self):
         self.check = True
         while self.check:
+            self.list_lock.acquire()
             self.retrieve()
+            self.list_lock.release()
             time.sleep(3)
 
     def stop(self):
