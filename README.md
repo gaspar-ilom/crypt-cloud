@@ -25,7 +25,7 @@ The root certificate will be created after the first request and stored as 'CA.p
 ## Install Requirements
 Note that some of the prerequisites have dependencies of their own. So it is the easiest way to use pip:
 ```sh
-pip install PACKAGE_NAME
+pip install cryptography flask flask_security flask_sqlalchemy flask_restful mysqlclient
 ```
 
 ## Launch Server application
@@ -61,7 +61,7 @@ The Client provides a rudimentary gui, and will write some logs to stdout.
 ## Install Requirements
 Note that some of the prerequisites have dependencies of their own. So it is the easiest way to use pip:
 ```sh
-pip install PACKAGE_NAME
+pip install cryptography easygui beautifulsoup4 bs4 zbar-py numpy opencv-python Pillow qrcode requests urllib3
 ```
 
 ## Launch Server application
