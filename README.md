@@ -72,6 +72,6 @@ python app.py
 ## Known Issues
 
 * No display of camera image, when reading QR-Codes from camera: https://github.com/skvark/opencv-python/issues/46
-* Unfortunately easygui does not handle threads well. So the user will only be informed of Notifications after each interaction with Main Menu. This could be changed to a shell-based interaction of by implementing a proper gui. In order to answer a SMP request refresh Notifications from time to time.
+* Unfortunately easygui does not handle threads well. So, regarding the gui the user will only be informed of Notifications after each interaction with the Main Menu. (There is a button to retrieve and act on new notifications in the main menu.) However, a new notification will be written immediately to stdout to inform the user.
 
 # LICENSE
