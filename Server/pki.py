@@ -33,7 +33,7 @@ def loadPrivateKey():
         with open("privateKey.pem", "wb") as f:
             f.write(key.private_bytes(
             encoding=serialization.Encoding.PEM,
-            format=serialization.PrivateFormat.TraditionalOpenSSL,
+            format=serialization.PrivateFormat.PKCS8,
             encryption_algorithm=serialization.BestAvailableEncryption(PRIVATE_KEY_PASS),
             ))
         #Create CA.pem certificate t be copied to clients!
