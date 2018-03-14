@@ -2,12 +2,13 @@ import requests
 from Configuration.settings import SERVER_HOST, SERVER_PORT, CA_KEY
 
 class Connection(object):
-    server = 'http://'+SERVER_HOST+':'+SERVER_PORT
+    server = 'https://'+SERVER_HOST+':'+SERVER_PORT
     session = requests.session()
 
     def __init__(self, server_host=SERVER_HOST, server_port=SERVER_PORT):
-        self.server = 'http://'+server_host+':'+server_port
+        self.server = 'https://'+server_host+':'+server_port
         self.session = requests.session()
+        self.session.verify = 'Configuration/tls_server_certificate.pem'
 
     def close(self):
         self.session.close()

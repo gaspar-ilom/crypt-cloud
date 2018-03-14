@@ -12,6 +12,11 @@ from Models.certificate import Certificate as cm
 from Models.revocation import Revocation as rm
 from Models.notification import Notification as nm
 from Models.data import Data as dm
+import ssl
+
+context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
+context.load_cert_chain('tls_server_certificate.pem', 'tls_private_key.pem')
+
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '!ThisShouldBeRandom_123456$%)(#X^'
@@ -57,4 +62,4 @@ def binary(data, code, headers=None):
 if __name__ == '__main__':
     from db import db
     db.init_app(app)
-    app.run(debug=True)
+    app.run(debug=True, ssl_context=context)
