@@ -42,7 +42,7 @@ python app.py
 ```
 
 # CryptCloud Client
-The client stores most of its configuration in the 'Configuration' subfolder. In 'Configuration/settings.py' the host and port of the server can be specified. By default it loads the CA's root certificate from 'Configuration/CA.pem'. (Note this certificate is created automatically, when the server is first launched and should be copied to the Client's 'Configuration'-folder.)
+The client stores most of its configuration in the 'Configuration' subfolder. In 'Configuration/settings.py' the host and port of the server can be specified. By default it loads the CA's root certificate from 'Configuration/CA.pem'. (Note this certificate is created automatically, when the server is first launched and the Client makes a request. It should be copied to the Client's 'Configuration'-folder.)
 Once the client has registered it will store its private key, the corresponding certificate issued by the CA, its secure passphrase and its credentials in the respective files in plaintext in the 'Configuration'-folder. Yet another reason not to use this in production. Never.
 The Client can recover its private key and certificate from the server. This is useful to add a new device to an existing account. (For that purpose the private key is stored encrypted with a secure twelve random word passphrase.)
 The Client allows to mutually verify other users' certificates in a synchronous SMP-session (requires a weak natural language word as a shared secret) or by scanning QR-Code from another user's device (requires a physical meeting).
