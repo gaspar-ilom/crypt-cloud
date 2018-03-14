@@ -75,7 +75,6 @@ class User(object):
     def retrieve_private_key(self):
         resp = CONN.get('/private_key/'+self.username)
         if resp.status_code == 200:
-            print(resp.text)
             key = resp.json()['private_key']
             if key:
                 print('Retrieved key from server.')
