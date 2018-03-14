@@ -4,6 +4,7 @@ Author: [Valentin Franck] <gaspar_ilom@campus.tu-berlin.de>
 This is just a Proof of Concept and should not be used in production for a number of reasons.
 * The Client application contains an unaudited implementation of a cryptographic protocol (SMP) and secret keys are not stored securely in general (i.e. they are stored as a file in the application foldes instead of using the OS' keyring for example. This is particularly troublesome because the server acts as the CA in a PKI.).
 * TLS 1.2 is switched on by default, but it uses hard.coded self-signed certificates. One can use generate_tls_certificate.py to generate a new self-signed TLS private Key and certificate (usable for localhost and crypt-cloud.com) and copy them to the correct directories in the Client and Server:
+
 ```sh
 python generate_tls_certificate.py
 mv tls_private_key.pem Server/tls_private_key.pem
