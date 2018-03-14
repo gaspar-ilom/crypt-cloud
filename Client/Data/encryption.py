@@ -232,6 +232,7 @@ class File(object):
         keys, data, shares, complete_keys = self.parse_data_from_server()
         if not data:
             gui.msgbox("Data from server could not be parsed. So sharing is not possible.")
+            return
         if username in keys:
             assert(username in shares)
             return

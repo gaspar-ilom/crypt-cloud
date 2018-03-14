@@ -107,6 +107,8 @@ class Certificate(object):
             assert(now > cert.not_valid_before and now < cert.not_valid_after)
             if username:
                 assert(cert.subject.get_attributes_for_oid(NameOID.COMMON_NAME)[0].value == username)
+            else:
+                username = cert.subject.get_attributes_for_oid(NameOID.COMMON_NAME)[0].value
             if self.is_revoked():
                 return False
             CA_KEY.verify(
@@ -119,7 +121,7 @@ class Certificate(object):
             gui.msgbox("Did not receive a valid certificate for the requested user!", 'No valid certificate')
             return False
         except InvalidSignature:
-             gui.msgbox("Signature check failed for the receive certificate of user "+username+"! Make sure you have the right CA (root) certificate. Otherwise there might be a Man in the middle attack!", 'Signature check failed')
+             gui.msgbox("Signature check failed for the received certificate of user {}! Make sure you have the right CA (root) certificate. Otherwise there might be a Man in the middle attack!".format(username), 'Signature check failed')
              return False
 
     def verify(self, smp=None, qr=None):
