@@ -3,7 +3,13 @@ Author: [Valentin Franck] <gaspar_ilom@campus.tu-berlin.de>
 
 This is just a Proof of Concept and should not be used in production for a number of reasons.
 * The Client application contains an unaudited implementation of a cryptographic protocol (SMP) and secret keys are not stored securely in general (i.e. they are stored as a file in the application foldes instead of using the OS' keyring for example. This is particularly troublesome because the server acts as the CA in a PKI.).
-* TLS is not switched on by default, but this could easily be done in both the server and the Client.
+* TLS 1.2 is switched on by default, but it uses hard.coded self-signed certificates. One can use generate_tls_certificate.py to generate a new self-signed TLS private Key and certificate (usable for localhost and crypt-cloud.com) and copy them to the correct directories in the Client and Server:
+```sh
+python generate_tls_certificate.py
+mv tls_private_key.pem Server/tls_private_key.pem
+cp tls_server_certificate.pem Client/Configuration/tls_server_certificate.pem
+mv tls_server_certificate.pem Server/tls_server_certificate.pem
+```
 
 # CryptCloud Server
 Most settings for the server application can be changed in the main module 'app.py'. In particular this means the Database URI, Debug-Mode (which is set to True and must be set to False in production), the Secret Key, the Password Salt and the CA's Private Key Passphrase in
