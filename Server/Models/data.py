@@ -2,6 +2,7 @@ from db import db
 from flask import Response
 from Models.joins import Data_Access
 from Models.notification import Notification
+from sqlalchemy.dialects.mysql import LONGBLOB
 
 class Data(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
@@ -9,7 +10,7 @@ class Data(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     user = db.relationship("User", foreign_keys=[user_id])
     key = db.Column(db.LargeBinary, nullable=False)
-    data = db.Column(db.LargeBinary, nullable=False)
+    data = db.Column(LONGBLOB, nullable=False)
 
     def __init__(self, name, user_id, key, data, shares=None):
         self.name = name
