@@ -139,6 +139,15 @@ class User(object):
         print("Generate a new private Key.")
         self.set_private_key()
 
+    def display_passphrase(self):
+        try:
+            with open('Configuration/private_passphrase.txt', 'r') as f:
+                gui.msgbox("Your secret passphrase to decrypt your private key is:\n{}".format(f.read()), 'SECRET PASSPHRASE')
+                return True
+        except FileNotFoundError:
+            gui.msgbox("No pasphrase found!")
+            return False
+
     def register(self):
         resource = '/register'
         try:

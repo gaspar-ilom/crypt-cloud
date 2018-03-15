@@ -10,22 +10,22 @@ HANDLER.start()
 
 def menu():
     HANDLER.handle()
-    choice = gui.buttonbox("What do you want to do?", 'Main Menu - {}'.format(USER.username), ('See Notifications', 'Access my Files (Share/Download/Delete etc.)', 'Upload new File', 'Verify User Certificate', 'Revoke my Certificate', 'Request new Certificate', 'Regenerate my Private Key (includes revocation)', 'Quit'))
+    choice = gui.buttonbox("What do you want to do?", 'Main Menu - {}'.format(USER.username), ('Notifications', 'Access my Files', 'Upload File', 'Verify Certificate', 'Revoke my Certificate', 'Request Certificate', 'Regenerate my Private Key (includes revocation)', 'Display Secret Passphrase', 'Quit'))
     if not choice:
         return False
     if choice == 'Quit':
         HANDLER.stop()
         return True
-    if choice == 'Access my Files (Share/Download/Delete etc.)':
+    if choice == 'Access my Files':
         retrieve_file_list()
-    elif choice == 'See Notifications':
+    elif choice == 'Notifications':
         return False
-    elif choice == 'Upload new File':
+    elif choice == 'Upload File':
         f = File()
         f.initiate()
         if f:
             f.options()
-    elif choice == 'Verify User Certificate':
+    elif choice == 'Verify Certificate':
         username = gui.enterbox("Please enter the username for certificate you want to verify.", 'Certificate Verification')
         if username:
             c = Certificate.get(username)
@@ -33,8 +33,10 @@ def menu():
                 c.verify()
     elif choice == 'Revoke my Certificate':
         USER.revoke_certificate()
-    elif choice == 'Request new Certificate':
+    elif choice == 'Request Certificate':
         USER.get_certificate(confirm=False)
     elif choice == 'Regenerate my Private Key (includes revocation)':
         USER.delete_private_key()
+    elif choice == 'Display Secret Passphrase':
+        USER.display_passphrase()
     return False
