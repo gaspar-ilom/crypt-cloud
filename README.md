@@ -82,4 +82,4 @@ python app.py
 * Unfortunately easygui does not handle threads well. So, regarding the gui the user will only be informed of Notifications after each interaction with the Main Menu. (There is a button to retrieve and act on new notifications in the main menu.) However, a new notification will be written immediately to stdout to inform the user.
 
 # LICENSE
-This will be decided later, once we publish the code.
+This code is free for anyone to to use, study, share and modify.
